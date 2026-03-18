@@ -3,155 +3,262 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Messages – ClassConnect</title>
+  <title>Professor Messages – ClassConnect</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #fff8e1;
-      padding: 30px;
+      background: #ededed;
       margin: 0;
-    }
-
-    h1 {
-      color: #e67e22;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .message-card {
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #e67e22;
       margin-bottom: 20px;
     }
 
-    .message-card p {
-      margin: 5px 0;
-      font-size: 16px;
-    }
-
-    .btn {
-      padding: 8px 14px;
-      background-color: #f1c40f;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-
-    .btn:hover {
-      background-color: #e67e22;
-    }
-
-    /* Popup Chatbox */
-    #chat-popup {
-      display: none;
-      position: fixed;
-      top: 20%;
-      left: 50%;
-      transform: translate(-50%, -20%);
-      background-color: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-      z-index: 10;
-      width: 300px;
-    }
-
-    #overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 5;
-    }
-
-    #chat-popup h3 {
-      margin-top: 0;
-      color: #f39c12;
-    }
-
-    textarea {
-      width: 100%;
-      height: 100px;
-      padding: 8px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      resize: none;
-    }
-
-    .chat-actions {
-      margin-top: 10px;
+    .chat-layout {
       display: flex;
-      justify-content: space-between;
+      gap: 20px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    #user-list {
+      width: 260px;
+      background: #f7f0da;
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    .user-btn {
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: #f1c40f;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: left;
+      transition: 0.2s ease;
+    }
+
+    .user-btn:hover {
+      background: #e67e22;
+      transform: translateY(-1px);
+    }
+
+    .chat-panel {
+      flex: 1;
+      background: #f7f0da;
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      min-height: 520px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    #chat-title {
+      margin-top: 0;
+      color: #e67e22;
+    }
+
+    #chat-box {
+      flex: 1;
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      overflow-y: auto;
+      margin-bottom: 14px;
+      border: 1px solid #eee;
+    }
+
+    .msg {
+      margin-bottom: 10px;
+      max-width: 72%;
+    }
+
+    .msg p {
+      margin: 0;
+      padding: 10px 12px;
+      border-radius: 12px;
+      line-height: 1.4;
+    }
+
+    .msg.me {
+      margin-left: auto;
+      text-align: right;
+    }
+
+    .msg.me p {
+      background: #f39c12;
+      color: white;
+    }
+
+    .msg.other p {
+      background: #ececec;
+      color: #2c3e50;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    #msg-input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    #msg-input:focus {
+      border-color: #e67e22;
+    }
+
+    .chat-input-row button {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      background: #f1c40f;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .chat-input-row button:hover {
+      background: #e67e22;
+    }
+
+    @media (max-width: 900px) {
+      .chat-layout {
+        flex-direction: column;
+      }
+
+      #user-list {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
 
-  <h1>Student Queries</h1>
+  <h2>Professor Messages</h2>
 
-  <div class="message-card">
-    <p><strong>Student:</strong> Riya Kapoor</p>
-    <p><strong>Query:</strong> Could you please share the notes from yesterday’s class?</p>
-    <button class="btn" onclick="openChat('Riya Kapoor')">Reply</button>
-  </div>
+  <div class="chat-layout">
+    <div id="user-list"></div>
 
-  <div class="message-card">
-    <p><strong>Student:</strong> Ankit Verma</p>
-    <p><strong>Query:</strong> I need help understanding OS scheduling algorithms.</p>
-    <button class="btn" onclick="openChat('Ankit Verma')">Reply</button>
-  </div>
+    <div class="chat-panel">
+      <h3 id="chat-title">Select a student</h3>
+      <div id="chat-box"></div>
 
-  <div class="message-card">
-    <p><strong>Student:</strong> Mehak Jain</p>
-    <p><strong>Query:</strong> Can I schedule a meeting after 4 PM tomorrow?</p>
-    <button class="btn" onclick="openChat('Mehak Jain')">Reply</button>
-  </div>
-
-  <!-- Overlay + Chat Popup -->
-  <div id="overlay"></div>
-  <div id="chat-popup">
-    <h3 id="chat-student-name">Reply to Student</h3>
-    <textarea placeholder="Type your reply here..."></textarea>
-    <div class="chat-actions">
-      <button class="btn" onclick="sendReply()">Send</button>
-      <button class="btn" onclick="closeChat()">Close</button>
+      <div class="chat-input-row">
+        <input type="text" id="msg-input" placeholder="Type your reply..." />
+        <button onclick="sendMessage()">Send</button>
+      </div>
     </div>
-    <p id="confirmation" style="color: green; font-weight: bold;"></p>
   </div>
 
   <script>
-    function openChat(studentName) {
-      document.getElementById("chat-student-name").textContent = `Reply to ${studentName}`;
-      document.querySelector("#chat-popup textarea").value = '';
-      document.getElementById("confirmation").textContent = '';
-      document.getElementById("chat-popup").style.display = "block";
-      document.getElementById("overlay").style.display = "block";
+    const API_BASE_URL = "http://127.0.0.1:5001";
+    let selectedUserId = null;
+
+    // Change IDs here if your student IDs are different
+    const students = [
+      { id: 1, name: "Arisha Chadha" },
+      { id: 2, name: "Riya Kapoor" },
+      { id: 3, name: "Kunal Joshi" }
+    ];
+
+    function loadStudentsForChat() {
+      const list = document.getElementById("user-list");
+      list.innerHTML = "";
+
+      students.forEach(stu => {
+        const btn = document.createElement("button");
+        btn.textContent = stu.name;
+        btn.className = "user-btn";
+
+        btn.onclick = () => {
+          selectedUserId = stu.id;
+          document.getElementById("chat-title").textContent = `Chat with ${stu.name}`;
+          loadMessages();
+        };
+
+        list.appendChild(btn);
+      });
     }
 
-    function closeChat() {
-      document.getElementById("chat-popup").style.display = "none";
-      document.getElementById("overlay").style.display = "none";
+    async function loadMessages() {
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (!token || !selectedUserId) return;
+
+      const res = await fetch(
+        `${API_BASE_URL}/api/messages/thread?with_user_id=${selectedUserId}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        }
+      );
+
+      const result = await res.json();
+      const chatBox = document.getElementById("chat-box");
+      chatBox.innerHTML = "";
+
+      (result.data || []).forEach(msg => {
+        const div = document.createElement("div");
+        div.className = msg.sender?.id === user.id ? "msg me" : "msg other";
+        div.innerHTML = `<p>${msg.body}</p>`;
+        chatBox.appendChild(div);
+      });
+
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function sendReply() {
-      const replyText = document.querySelector("#chat-popup textarea").value.trim();
-      if (replyText === "") {
-        document.getElementById("confirmation").textContent = "Please type a message before sending.";
-        document.getElementById("confirmation").style.color = "red";
+    async function sendMessage() {
+      const token = localStorage.getItem("token");
+      const text = document.getElementById("msg-input").value.trim();
+
+      if (!token || !selectedUserId || !text) return;
+
+      const res = await fetch(`${API_BASE_URL}/api/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          recipient_id: selectedUserId,
+          body: text
+        })
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        alert(result.message || "Failed to send message");
         return;
       }
 
-      document.getElementById("confirmation").textContent = "Reply sent successfully.";
-      document.getElementById("confirmation").style.color = "green";
+      document.getElementById("msg-input").value = "";
+      loadMessages();
     }
+
+    window.onload = function () {
+      loadStudentsForChat();
+      setInterval(loadMessages, 2000);
+    };
   </script>
 
 </body>
