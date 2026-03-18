@@ -130,7 +130,7 @@
         }
 
         meetings.forEach(meeting => {
-          const studentName = meeting.student_name || "Student";
+          const studentName = meeting.student_name || meeting.student?.name || "Student";
           const agenda = meeting.agenda || "No agenda provided";
           const date = meeting.date || "N/A";
           const start = meeting.start_time || "N/A";
@@ -145,6 +145,9 @@
             <p><strong>Date:</strong> ${date}</p>
             <p><strong>Time:</strong> ${start} - ${end}</p>
             <p><strong>Location:</strong> ${location}</p>
+            <p class="status"><strong>Status:</strong> pending</p>
+            <p><strong>Update Note:</strong> ${meeting.update_note || "No updates yet"}</p>
+            <p><strong>Last Updated By:</strong> ${meeting.last_updated_by || "N/A"}</p>
             <button class="btn" onclick="updateMeetingStatus(${meeting.id}, 'accept')">Accept</button>
             <button class="btn reject-btn" onclick="updateMeetingStatus(${meeting.id}, 'reject')">Reject</button>
           `;
@@ -190,13 +193,28 @@
         }
 
         meetings.forEach(meeting => {
-          const studentName = meeting.student_name || "Student";
+          const studentName = meeting.student_name || meeting.student?.name || "Student";
           const agenda = meeting.agenda || "No agenda provided";
           const date = meeting.date || "N/A";
           const start = meeting.start_time || "N/A";
           const end = meeting.end_time || "N/A";
           const location = meeting.location || "TBD";
           const status = meeting.status || "pending";
+
+          let actionButtons = "";
+
+          if (status === "pending") {
+            actionButtons = `
+              <button class="btn" onclick="updateMeetingStatus(${meeting.id}, 'accept')">Accept</button>
+              <button class="btn reject-btn" onclick="updateMeetingStatus(${meeting.id}, 'reject')">Reject</button>
+            `;
+          } else if (status === "confirmed") {
+            actionButtons = `
+              <button class="btn" onclick="changeLocation(${meeting.id})">Change Location</button>
+              <button class="btn" onclick="rescheduleMeeting(${meeting.id})">Reschedule</button>
+              <button class="btn reject-btn" onclick="rejectConfirmedMeeting(${meeting.id})">Reject Meeting</button>
+            `;
+          }
 
           const card = document.createElement("div");
           card.className = "card";
@@ -207,6 +225,9 @@
             <p><strong>Time:</strong> ${start} - ${end}</p>
             <p><strong>Location:</strong> ${location}</p>
             <p class="status"><strong>Status:</strong> ${status}</p>
+            <p><strong>Update Note:</strong> ${meeting.update_note || "No updates yet"}</p>
+            <p><strong>Last Updated By:</strong> ${meeting.last_updated_by || "N/A"}</p>
+            ${actionButtons}
           `;
           container.appendChild(card);
         });
@@ -242,6 +263,113 @@
       } catch (error) {
         console.error(error);
         alert(`Error trying to ${action} meeting.`);
+      }
+    }
+
+    async function changeLocation(meetingId) {
+      const token = getToken();
+      const newLocation = prompt("Enter new location:");
+
+      if (!token || !newLocation || !newLocation.trim()) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/meetings/${meetingId}/reschedule`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            location: newLocation.trim()
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          alert(result.message || "Failed to update location.");
+          return;
+        }
+
+        alert("Location updated successfully.");
+        loadIncomingRequests();
+        loadMyMeetings();
+      } catch (error) {
+        console.error(error);
+        alert("Error updating location.");
+      }
+    }
+
+    async function rescheduleMeeting(meetingId) {
+      const token = getToken();
+
+      const newDate = prompt("Enter new date (YYYY-MM-DD):");
+      if (!newDate) return;
+
+      const newStart = prompt("Enter new start time (HH:MM):");
+      if (!newStart) return;
+
+      const newEnd = prompt("Enter new end time (HH:MM):");
+      if (!newEnd) return;
+
+      const newLocation = prompt("Enter new location:");
+      if (!newLocation) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/meetings/${meetingId}/reschedule`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            date: newDate,
+            start_time: newStart,
+            end_time: newEnd,
+            location: newLocation
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          alert(result.message || "Failed to reschedule meeting.");
+          return;
+        }
+
+        alert("Meeting updated successfully.");
+        loadIncomingRequests();
+        loadMyMeetings();
+      } catch (error) {
+        console.error(error);
+        alert("Error updating meeting.");
+      }
+    }
+
+    async function rejectConfirmedMeeting(meetingId) {
+      const token = getToken();
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/meetings/${meetingId}/reject`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          alert(result.message || "Failed to reject meeting.");
+          return;
+        }
+
+        alert("Meeting rejected successfully.");
+        loadIncomingRequests();
+        loadMyMeetings();
+      } catch (error) {
+        console.error(error);
+        alert("Error rejecting meeting.");
       }
     }
 

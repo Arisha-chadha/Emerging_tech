@@ -139,22 +139,12 @@
     <button onclick="showTab('scheduled')">Scheduled Meetings</button>
   </div>
 
-  <!-- Available Professors Section -->
   <div id="available" class="tab-content active">
-    <div class="professor-list" id="professor-list">
-      <!-- Dynamic professor cards will come here -->
-    </div>
+    <div class="professor-list" id="professor-list"></div>
   </div>
 
-  <!-- Scheduled Meetings Section -->
   <div id="scheduled" class="tab-content">
-    <div class="professor-list">
-      <div class="meeting-card">
-        <h3>My Scheduled Meetings</h3>
-        <p>This section can be connected to backend next.</p>
-        <p style="color: #666;"><strong>Status:</strong> Static for now</p>
-      </div>
-    </div>
+    <div class="professor-list" id="student-meetings-list"></div>
   </div>
 
   <div id="overlay"></div>
@@ -167,218 +157,220 @@
   </div>
 
   <script>
-  const API_BASE_URL = "http://127.0.0.1:5001";
+    const API_BASE_URL = "http://127.0.0.1:5001";
 
-  let selectedLocation = "";
-  let selectedDate = "";
-  let selectedProfessorId = null;
-  let selectedProfessorName = "";
+    let selectedLocation = "";
+    let selectedDate = "";
+    let selectedProfessorId = null;
+    let selectedProfessorName = "";
 
-  const professorSlots = {
-    2: [
-      { label: "10:00 AM", start: "10:00", end: "11:00" },
-      { label: "11:30 AM", start: "11:30", end: "12:30" }
-    ],
-    3: [
-      { label: "2:00 PM", start: "14:00", end: "15:00" },
-      { label: "4:15 PM", start: "16:15", end: "17:15" }
-    ],
-    4: [
-      { label: "9:30 AM", start: "09:30", end: "10:30" },
-      { label: "1:00 PM", start: "13:00", end: "14:00" }
-    ]
-  };
+    const professorSlots = {
+      2: [
+        { label: "10:00 AM", start: "10:00", end: "11:00" },
+        { label: "11:30 AM", start: "11:30", end: "12:30" }
+      ],
+      3: [
+        { label: "2:00 PM", start: "14:00", end: "15:00" },
+        { label: "4:15 PM", start: "16:15", end: "17:15" }
+      ],
+      4: [
+        { label: "9:30 AM", start: "09:30", end: "10:30" },
+        { label: "1:00 PM", start: "13:00", end: "14:00" }
+      ]
+    };
 
-  function showTab(tabId) {
-    document.getElementById("available").classList.remove("active");
-    document.getElementById("scheduled").classList.remove("active");
-    document.getElementById(tabId).classList.add("active");
+    function showTab(tabId) {
+      document.getElementById("available").classList.remove("active");
+      document.getElementById("scheduled").classList.remove("active");
+      document.getElementById(tabId).classList.add("active");
 
-    if (tabId === "scheduled") {
-      loadMyMeetings();
-    }
-  }
-
-  function openPopup(professorId, professorName, location, dateInputId) {
-    selectedProfessorId = professorId;
-    selectedProfessorName = professorName;
-    selectedLocation = location || "TBD";
-    selectedDate = document.getElementById(dateInputId).value;
-
-    if (!selectedDate) {
-      alert("Please select a date first.");
-      return;
+      if (tabId === "scheduled") {
+        loadMyMeetings();
+      }
     }
 
-    const slots = professorSlots[professorId] || [
-      { label: "10:00 AM", start: "10:00", end: "11:00" },
-      { label: "11:30 AM", start: "11:30", end: "12:30" }
-    ];
+    function openPopup(professorId, professorName, location, dateInputId) {
+      selectedProfessorId = professorId;
+      selectedProfessorName = professorName;
+      selectedLocation = location || "TBD";
+      selectedDate = document.getElementById(dateInputId).value;
 
-    const slotContainer = document.getElementById("slot-container");
-    slotContainer.innerHTML = "";
-
-    slots.forEach(slot => {
-      const span = document.createElement("span");
-      span.className = "slot";
-      span.textContent = slot.label;
-      span.onclick = () => selectTime(slot.start, slot.end, slot.label);
-      slotContainer.appendChild(span);
-    });
-
-    document.getElementById("popup").style.display = "block";
-    document.getElementById("overlay").style.display = "block";
-    document.getElementById("confirmationMessage").textContent = "";
-    document.querySelector("#popup h4").textContent = `Select a Time Slot for ${selectedProfessorName}`;
-  }
-
-  function closePopup() {
-    document.getElementById("popup").style.display = "none";
-    document.getElementById("overlay").style.display = "none";
-  }
-
-  async function selectTime(startTime, endTime, label) {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Please login first.");
-      window.location.href = "index.html";
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/meetings`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          professor_id: selectedProfessorId,
-          date: selectedDate,
-          start_time: startTime,
-          end_time: endTime,
-          location: selectedLocation,
-          agenda: `Meeting with ${selectedProfessorName}`
-        })
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        document.getElementById("confirmationMessage").textContent =
-          result.message || "Failed to request meeting.";
+      if (!selectedDate) {
+        alert("Please select a date first.");
         return;
       }
 
-      document.getElementById("confirmationMessage").textContent =
-        `Meeting requested with ${selectedProfessorName} on ${selectedDate} at ${label}. Waiting for professor's confirmation.`;
+      const slots = professorSlots[professorId] || [
+        { label: "10:00 AM", start: "10:00", end: "11:00" },
+        { label: "11:30 AM", start: "11:30", end: "12:30" }
+      ];
 
-      loadMyMeetings();
-    } catch (error) {
-      console.error("Meeting request error:", error);
-      document.getElementById("confirmationMessage").textContent =
-        "Error sending meeting request.";
+      const slotContainer = document.getElementById("slot-container");
+      slotContainer.innerHTML = "";
+
+      slots.forEach(slot => {
+        const span = document.createElement("span");
+        span.className = "slot";
+        span.textContent = slot.label;
+        span.onclick = () => selectTime(slot.start, slot.end, slot.label);
+        slotContainer.appendChild(span);
+      });
+
+      document.getElementById("popup").style.display = "block";
+      document.getElementById("overlay").style.display = "block";
+      document.getElementById("confirmationMessage").textContent = "";
+      document.querySelector("#popup h4").textContent = `Select a Time Slot for ${selectedProfessorName}`;
     }
-  }
 
-  async function loadProfessors() {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/users/professors`);
-      const result = await response.json();
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+      document.getElementById("overlay").style.display = "none";
+    }
 
-      const container = document.getElementById("professor-list");
-      container.innerHTML = "";
-
-      if (!result.data || result.data.length === 0) {
-        container.innerHTML = "<p>No professors found.</p>";
+    async function selectTime(startTime, endTime, label) {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please login first.");
+        window.location.href = "index.html";
         return;
       }
 
-      result.data.forEach((prof, index) => {
-        const card = document.createElement("div");
-        card.className = "professor-card";
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/meetings`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            professor_id: selectedProfessorId,
+            date: selectedDate,
+            start_time: startTime,
+            end_time: endTime,
+            location: selectedLocation,
+            agenda: `Meeting with ${selectedProfessorName}`
+          })
+        });
 
-        const dateId = `date${index + 1}`;
-        const professorLocations = {
-          2: "LHC 304 B",
-          3: "AB2 210",
-          4: "LHC 212 A"
-        };
-        const location = prof.cabin_location || professorLocations[prof.id] || "LHC 101";
+        const result = await response.json();
 
-        card.innerHTML = `
-          <h3>${prof.name}</h3>
-          <p><strong>Email:</strong> ${prof.email}</p>
-          <p><strong>Location:</strong> ${location}</p>
-          <input type="date" class="date-input" id="${dateId}" />
-          <button class="btn" onclick="openPopup(${prof.id}, '${prof.name.replace(/'/g, "\\'")}', '${location.replace(/'/g, "\\'")}', '${dateId}')">Schedule Meet</button>
-        `;
-
-        container.appendChild(card);
-      });
-    } catch (error) {
-      console.error("Error loading professors:", error);
-      document.getElementById("professor-list").innerHTML =
-        "<p>Failed to load professors from backend.</p>";
-    }
-  }
-
-  async function loadMyMeetings() {
-    const token = localStorage.getItem("token");
-    const scheduledContainer = document.querySelector("#scheduled .professor-list");
-
-    if (!token) {
-      scheduledContainer.innerHTML = "<p>Please login first.</p>";
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/meetings/mine`, {
-        headers: {
-          "Authorization": `Bearer ${token}`
+        if (!response.ok) {
+          document.getElementById("confirmationMessage").textContent =
+            result.message || "Failed to request meeting.";
+          return;
         }
-      });
 
-      const result = await response.json();
-      scheduledContainer.innerHTML = "";
+        document.getElementById("confirmationMessage").textContent =
+          `Meeting requested with ${selectedProfessorName} on ${selectedDate} at ${label}. Waiting for professor's confirmation.`;
 
-      if (!response.ok) {
-        scheduledContainer.innerHTML = `<p>${result.message || "Failed to load meetings."}</p>`;
-        return;
+        loadMyMeetings();
+      } catch (error) {
+        console.error("Meeting request error:", error);
+        document.getElementById("confirmationMessage").textContent =
+          "Error sending meeting request.";
       }
-
-      const meetings = result.data || [];
-
-      if (meetings.length === 0) {
-        scheduledContainer.innerHTML = "<p>No meetings requested yet.</p>";
-        return;
-      }
-
-      meetings.forEach(meeting => {
-        const card = document.createElement("div");
-        card.className = "meeting-card";
-
-        card.innerHTML = `
-          <h3>${meeting.professor?.name || "Professor"}</h3>
-          <p>Date: ${meeting.date || "N/A"}</p>
-          <p>Time: ${meeting.start_time || "N/A"} - ${meeting.end_time || "N/A"}</p>
-          <p>Location: ${meeting.location || "TBD"}</p>
-          <p><strong>Status:</strong> ${meeting.status || "pending"}</p>
-        `;
-
-        scheduledContainer.appendChild(card);
-      });
-    } catch (error) {
-      console.error("Error loading student meetings:", error);
-      scheduledContainer.innerHTML = "<p>Error loading meetings.</p>";
     }
-  }
 
-  window.onload = function () {
-    loadProfessors();
-    loadMyMeetings();
-  };
-</script>
+    async function loadProfessors() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/users/professors`);
+        const result = await response.json();
+
+        const container = document.getElementById("professor-list");
+        container.innerHTML = "";
+
+        if (!result.data || result.data.length === 0) {
+          container.innerHTML = "<p>No professors found.</p>";
+          return;
+        }
+
+        result.data.forEach((prof, index) => {
+          const card = document.createElement("div");
+          card.className = "professor-card";
+
+          const dateId = `date${index + 1}`;
+          const professorLocations = {
+            2: "LHC 304 B",
+            3: "AB2 210",
+            4: "LHC 212 A"
+          };
+          const location = prof.cabin_location || professorLocations[prof.id] || "LHC 101";
+
+          card.innerHTML = `
+            <h3>${prof.name}</h3>
+            <p><strong>Email:</strong> ${prof.email}</p>
+            <p><strong>Location:</strong> ${location}</p>
+            <input type="date" class="date-input" id="${dateId}" />
+            <button class="btn" onclick="openPopup(${prof.id}, '${prof.name.replace(/'/g, "\\'")}', '${location.replace(/'/g, "\\'")}', '${dateId}')">Schedule Meet</button>
+          `;
+
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Error loading professors:", error);
+        document.getElementById("professor-list").innerHTML =
+          "<p>Failed to load professors from backend.</p>";
+      }
+    }
+
+    async function loadMyMeetings() {
+      const token = localStorage.getItem("token");
+      const scheduledContainer = document.getElementById("student-meetings-list");
+
+      if (!token) {
+        scheduledContainer.innerHTML = "<p>Please login first.</p>";
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/meetings/mine`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        const result = await response.json();
+        scheduledContainer.innerHTML = "";
+
+        if (!response.ok) {
+          scheduledContainer.innerHTML = `<p>${result.message || "Failed to load meetings."}</p>`;
+          return;
+        }
+
+        const meetings = result.data || [];
+
+        if (meetings.length === 0) {
+          scheduledContainer.innerHTML = "<p>No meetings requested yet.</p>";
+          return;
+        }
+
+        meetings.forEach(meeting => {
+          const card = document.createElement("div");
+          card.className = "meeting-card";
+
+          card.innerHTML = `
+            <h3>${meeting.professor?.name || "Professor"}</h3>
+            <p>Date: ${meeting.date || "N/A"}</p>
+            <p>Time: ${meeting.start_time || "N/A"} - ${meeting.end_time || "N/A"}</p>
+            <p>Location: ${meeting.location || "TBD"}</p>
+            <p><strong>Status:</strong> ${meeting.status || "pending"}</p>
+            <p><strong>Update Note:</strong> ${meeting.update_note || "No updates yet"}</p>
+            <p><strong>Last Updated By:</strong> ${meeting.last_updated_by || "N/A"}</p>
+          `;
+
+          scheduledContainer.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Error loading student meetings:", error);
+        scheduledContainer.innerHTML = "<p>Error loading meetings.</p>";
+      }
+    }
+
+    window.onload = function () {
+      loadProfessors();
+      loadMyMeetings();
+    };
+  </script>
 
 </body>
 </html>

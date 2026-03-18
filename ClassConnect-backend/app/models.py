@@ -50,6 +50,8 @@ class Meeting(TimestampMixin, db.Model):
     location = db.Column(db.String(120), nullable=False)
     agenda = db.Column(db.String(255), default="")
     status = db.Column(db.String(20), default="pending")  # pending/confirmed/rejected/cancelled
+    update_note = db.Column(db.String(255), nullable=True)
+    last_updated_by = db.Column(db.String(50), nullable=True)
 
     student = db.relationship("User", foreign_keys=[student_id])
     professor = db.relationship("User", foreign_keys=[professor_id])

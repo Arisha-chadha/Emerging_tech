@@ -35,6 +35,9 @@ class MeetingSchema(Schema):
     status = fields.Str()
     created_at = fields.DateTime(dump_only=True)
 
+    update_note = fields.Str(allow_none=True)
+    last_updated_by = fields.Str(allow_none=True)
+
 class MessageSchema(Schema):
     id = fields.Int(dump_only=True)
     sender = fields.Nested(UserSchema, dump_only=True)
