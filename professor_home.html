@@ -3,167 +3,220 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Professor Home – ClassConnect</title>
+  <title>Professor Dashboard – ClassConnect</title>
+
   <style>
-    body {
-      margin: 0;
-      font-family: 'Arial', sans-serif;
-      color: #333;
-      background-color: #fff;
+    * {
+      box-sizing: border-box;
     }
 
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: #2c3e50;
+      background: #ededed;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HERO */
     .hero-section {
-      background-image: url('manipal_bg.JPG'); /* Use same background */
+      background-image: url('manipal_bg.JPG');
       background-size: cover;
       background-position: center;
-      height: 300px;
-      position: relative;
+      height: 340px;
     }
 
     .overlay {
-      background: rgba(0, 0, 0, 0.5);
+      background: linear-gradient(
+        rgba(0, 0, 0, 0.55),
+        rgba(0, 0, 0, 0.45)
+      );
       height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      color: #fff;
+      color: white;
       text-align: center;
     }
 
-    header h1 {
-      font-size: 2.5em;
+    .overlay h1 {
+      font-size: 3rem;
       margin: 0;
     }
 
-    header p {
-      font-size: 1.2em;
-      margin-top: 10px;
+    .overlay p {
+      margin-top: 12px;
+      font-size: 1.1rem;
     }
 
+    /* NAVBAR */
     nav {
-      background-color: #f39c12;
-      text-align: center;
-      padding: 12px 0;
+      background: #f39c12;
+      display: flex;
+      justify-content: center;
+      gap: 36px;
+      padding: 14px 20px;
     }
 
-    nav a {
+    nav a, nav button {
       color: white;
       text-decoration: none;
-      margin: 0 20px;
       font-weight: bold;
-      font-size: 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      position: relative;
+    }
+
+    nav a::after {
+      content: "";
+      display: block;
+      width: 0%;
+      height: 2px;
+      background: white;
+      transition: 0.3s;
+      margin: auto;
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    /* MAIN SECTION */
+    .dashboard-section {
+      flex: 1;
+      padding: 60px 20px;
     }
 
     .container {
-      padding: 40px 20px;
       display: flex;
-      flex-wrap: wrap;
       justify-content: center;
-      gap: 30px;
+      flex-wrap: wrap;
+      gap: 24px;
     }
 
+    /* CARDS */
     .card {
-      background-color: #fff8e1;
-      width: 300px;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transition: transform 0.3s;
+      background: #f7f0da;
+      width: 290px;
+      padding: 24px;
+      border-radius: 18px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: 0.25s;
     }
 
     .card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-8px);
     }
 
     .card h2 {
       color: #e67e22;
-      margin-top: 0;
+      margin: 0;
     }
 
+    .card p {
+      margin: 10px 0 16px;
+      font-size: 0.95rem;
+    }
+
+    /* BUTTON */
     .btn {
-      background-color: #f1c40f;
-      color: white;
-      padding: 10px 20px;
+      background: #f1c40f;
       border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      padding: 10px;
+      border-radius: 10px;
+      color: white;
       font-weight: bold;
+      cursor: pointer;
     }
 
     .btn:hover {
-      background-color: #e67e22;
+      background: #e67e22;
     }
 
     footer {
-      background-color: #f1c40f;
+      background: #f39c12;
       color: white;
       text-align: center;
-      padding: 15px;
-      margin-top: 40px;
+      padding: 12px;
     }
   </style>
 </head>
+
 <body>
 
+  <!-- HERO -->
   <div class="hero-section">
     <div class="overlay">
-      <header>
-        <h1>Welcome Professor</h1>
-        <p>Manage meetings and share knowledge with your students</p>
-      </header>
+      <h1>Professor Dashboard</h1>
+      <p>Manage availability, meetings, and student interaction efficiently</p>
     </div>
   </div>
 
+  <!-- NAV -->
   <nav>
-    <a href="#">Home</a>
-    <a href="#">Availability</a>
-    <a href="#">Meetings</a>
-    <a href="#">Resources</a>
-    <a href="#">Messages</a>
+    <a href="availability.html">Availability</a>
+    <a href="meeting_requests.html">Meetings</a>
+    <a href="upload_resources.html">Resources</a>
+    <a href="professor_messages.html">Messages</a>
+    <button onclick="logoutUser()">Logout</button>
   </nav>
 
-  <div class="container">
-    <div class="card">
-      <h2>Manage Availability</h2>
-      <p>Update your available time slots for student meetings.</p>
-      <a href="availability.html">
-        <button class="btn">Edit Availability</button>
-      </a>
-      
-    </div>
+  <!-- DASHBOARD -->
+  <section class="dashboard-section">
+    <div class="container">
 
-    <div class="card">
-      <h2>Accept / Reject Meetings</h2>
-      <p>View pending meeting requests and take actions.</p>
-      <a href="meeting_requests.html">
-        <button class="btn">View Requests</button>
-      </a>
-      
-    </div>
+      <div class="card">
+        <h2>Availability</h2>
+        <p>Set and update your available time slots.</p>
+        <a href="availability.html">
+          <button class="btn">Manage</button>
+        </a>
+      </div>
 
-    <div class="card">
-      <h2>Share Resources</h2>
-      <p>Upload notes, presentations, or links for students.</p>
-      <a href="upload_resources.html">
-        <button class="btn">Upload Resource</button>
-      </a>
-      
-    </div>
+      <div class="card">
+        <h2>Meetings</h2>
+        <p>Accept, reject, or reschedule meeting requests.</p>
+        <a href="meeting_requests.html">
+          <button class="btn">Open</button>
+        </a>
+      </div>
 
-    <div class="card">
-      <h2>Messages</h2>
-      <p>Respond to student queries or initiate communication.</p>
-      <a href="professor_messages.html">
-        <button class="btn">View Messages</button>
-      </a>
-      
+      <div class="card">
+        <h2>Resources</h2>
+        <p>Upload and manage study materials for students.</p>
+        <a href="upload_resources.html">
+          <button class="btn">Upload</button>
+        </a>
+      </div>
+
+      <div class="card">
+        <h2>Messages</h2>
+        <p>Communicate with students and resolve queries.</p>
+        <a href="professor_messages.html">
+          <button class="btn">View</button>
+        </a>
+      </div>
+
     </div>
-  </div>
+  </section>
 
   <footer>
-    <p>&copy; 2025 ClassConnect – Manipal University Jaipur</p>
+    <p>&copy; 2026 ClassConnect – Manipal University Jaipur</p>
   </footer>
+
+  <script>
+    function logoutUser() {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+  </script>
 
 </body>
 </html>

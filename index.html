@@ -5,23 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ClassConnect – Manipal University Jaipur</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: 'Arial', sans-serif;
-      color: #333;
-      background-color: #fff;
+      font-family: Arial, sans-serif;
+      color: #2c3e50;
+      background: #ededed;
+      min-height: 100vh;
     }
 
     .hero-section {
       background-image: url('manipal_bg.JPG');
       background-size: cover;
-      background-position: center;
-      height: 300px;
+      background-position: center;;
+      height: 340px;
       position: relative;
     }
 
     .overlay {
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.52);
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -29,143 +34,253 @@
       align-items: center;
       color: #fff;
       text-align: center;
+      padding: 20px;
     }
 
-    header h1 {
-      font-size: 2.5em;
+    .overlay h1 {
+      font-size: 3rem;
       margin: 0;
+      font-weight: 700;
+      letter-spacing: 0.3px;
     }
 
-    header p {
-      font-size: 1.2em;
-      margin-top: 10px;
+    .overlay p {
+      font-size: 1.1rem;
+      margin-top: 14px;
+      max-width: 760px;
+      line-height: 1.5;
     }
 
-    nav {
-      background-color: #f39c12;
-      text-align: center;
-      padding: 12px 0;
-    }
+   nav {
+    background: #f39c12;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 36px;
+    padding: 14px 20px;   /* increased from 12 → 14 */
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.10);
+    flex-wrap: wrap;
+  }
 
-    nav a {
+    nav a,
+    nav button {
       color: white;
       text-decoration: none;
-      margin: 0 20px;
       font-weight: bold;
-      font-size: 16px;
+      font-size: 15px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    nav a:hover,
+    nav button:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    #main-content {
+      display: none;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    .dashboard-section {
+      background: #ededed;
+      padding: 48px 20px 64px;
+      flex: 1;
     }
 
     .container {
-      padding: 40px 20px;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 30px;
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
     }
 
     .card {
-      background-color: #fff8e1;
-      width: 300px;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transition: transform 0.3s;
+      background: #f7f0da;
+      width: 290px;
+      min-height: 210px;
+      padding: 22px 20px;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid #efe2b8;
     }
 
     .card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-6px);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
     }
 
     .card h2 {
       color: #e67e22;
-      margin-top: 0;
+      margin: 0 0 10px 0;
+      font-size: 1.7rem;
+      line-height: 1.1;
     }
 
-    .btn, .login-btn {
-      background-color: #f1c40f;
+    .card p {
+      font-size: 0.98rem;
+      line-height: 1.45;
+      margin: 0 0 16px 0;
+      color: #4b5563;
+    }
+
+    .btn,
+    .login-btn {
+      background: #f1c40f;
       color: white;
-      padding: 10px 20px;
+      padding: 10px 16px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
+      font-size: 14px;
+      transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .btn:hover, .login-btn:hover {
-      background-color: #e67e22;
+    .btn:hover,
+    .login-btn:hover {
+      background: #e67e22;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(230, 126, 34, 0.22);
+    }
+
+    .card a {
+      text-decoration: none;
     }
 
     footer {
-      background-color: #f1c40f;
+      background: #f39c12;
       color: white;
       text-align: center;
-      padding: 15px;
-      margin-top: 40px;
+      padding: 12px;
+      font-size: 0.95rem;
+      margin-top: auto;
     }
 
     #login-page {
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      background: #fef3dc;
+      background:
+        linear-gradient(rgba(0,0,0,0.42), rgba(0,0,0,0.42)),
+        url('manipal_bg.JPG') center/cover no-repeat;
+      padding: 20px;
     }
 
-    #login-page h2 {
-      color: #e67e22;
-      margin-bottom: 20px;
+    .login-title {
+      color: white;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .login-title h2 {
+      font-size: 2.4rem;
+      margin: 0;
+    }
+
+    .login-title p {
+      margin-top: 10px;
+      font-size: 1.05rem;
+      color: #fdf2d0;
     }
 
     #login-form {
       display: flex;
       flex-direction: column;
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      width: 300px;
+      background: rgba(255, 255, 255, 0.97);
+      padding: 32px 28px;
+      border-radius: 18px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+      width: 360px;
+      backdrop-filter: blur(4px);
     }
 
     #login-form label {
-      margin-top: 10px;
-      margin-bottom: 5px;
+      margin-top: 12px;
+      margin-bottom: 6px;
       font-weight: bold;
+      color: #374151;
     }
 
     #login-form select,
     #login-form input {
-      padding: 8px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      padding: 11px 12px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 15px;
+      outline: none;
     }
 
-    #main-content {
-      display: none;
+    #login-form select:focus,
+    #login-form input:focus {
+      border-color: #e67e22;
+      box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.12);
     }
 
     #error-message {
-      color: red;
+      color: #dc2626;
       font-size: 14px;
-      margin-top: 10px;
+      margin-top: 12px;
       min-height: 18px;
       text-align: center;
+      font-weight: 600;
     }
 
     #success-message {
-      color: green;
+      color: #15803d;
       font-size: 14px;
-      margin-top: 10px;
+      margin-top: 12px;
       min-height: 18px;
       text-align: center;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .overlay h1 {
+        font-size: 2.2rem;
+      }
+
+      .overlay p {
+        font-size: 1rem;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 340px;
+      }
+
+      #login-form {
+        width: 100%;
+        max-width: 360px;
+      }
+
+      nav {
+        gap: 20px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- LOGIN PAGE -->
   <div id="login-page">
-    <h2>Login to ClassConnect</h2>
+    <div class="login-title">
+      <h2>Welcome to ClassConnect</h2>
+      <p>Sign in to access your academic scheduling and collaboration portal.</p>
+    </div>
+
     <form id="login-form" onsubmit="return loginUser(event)">
       <label for="role">I am a:</label>
       <select id="role" required>
@@ -187,52 +302,57 @@
     </form>
   </div>
 
-  <!-- STUDENT MAIN CONTENT -->
   <div id="main-content">
     <div class="hero-section">
       <div class="overlay">
-        <header>
-          <h1>Welcome to ClassConnect</h1>
-          <p>Connecting Students and Professors at Manipal University Jaipur</p>
-        </header>
+        <h1>Welcome to ClassConnect</h1>
+        <p>Connecting Students and Professors at Manipal University Jaipur</p>
       </div>
     </div>
 
     <nav>
-      <a href="#">Home</a>
-      <a href="#">Scheduling</a>
-      <a href="#">Messages</a>
-      <a href="#">Resources</a>
+      <a href="available_professors.html">Scheduling</a>
+      <a href="messages.html">Messages</a>
+      <a href="resources.html">Resources</a>
+      <button onclick="logoutUser()">Logout</button>
     </nav>
 
-    <div class="container">
+    <section class="dashboard-section">
+      <div class="container">
       <div class="card">
-        <h2>Professor Availability</h2>
-        <p>Check real-time availability and schedule meetings with your professors easily!</p>
-        <a href="available_professors.html">
-          <button class="btn">View Available Professors</button>
-        </a>
-      </div>
+  <div>
+    <h2>Schedule Meetings</h2>
+    <p>Book meetings with professors based on availability.</p>
+  </div>
+  <a href="available_professors.html">
+    <button class="btn">View Available Professors</button>
+  </a>
+</div>
 
-      <div class="card">
-        <h2>Messages</h2>
-        <p>Communicate with professors about your meetings and academic queries.</p>
-        <a href="messages.html">
-          <button class="btn">Check Messages</button>
-        </a>
-      </div>
+<div class="card">
+  <div>
+    <h2>Messages</h2>
+    <p>View and manage conversations with professors.</p>
+  </div>
+  <a href="messages.html">
+    <button class="btn">Check Messages</button>
+  </a>
+</div>
 
-      <div class="card">
-        <h2>Academic Resources</h2>
-        <p>Access lecture notes, study materials, and announcements shared by professors.</p>
-        <a href="resources.html">
-          <button class="btn">Browse Resources</button>
-        </a>
+<div class="card">
+  <div>
+    <h2>Resources</h2>
+    <p>Access notes, materials, and shared academic files.</p>
+  </div>
+  <a href="resources.html">
+    <button class="btn">Browse Resources</button>
+  </a>
+</div>
       </div>
-    </div>
+    </section>
 
     <footer>
-      <p>&copy; 2025 ClassConnect – Manipal University Jaipur</p>
+      <p>&copy; 2026 ClassConnect – Manipal University Jaipur</p>
     </footer>
   </div>
 
@@ -286,7 +406,7 @@
 
         if (user.role === "student") {
           document.getElementById("login-page").style.display = "none";
-          document.getElementById("main-content").style.display = "block";
+          document.getElementById("main-content").style.display = "flex";
         } else if (user.role === "professor") {
           window.location.href = "professor_home.html";
         }
@@ -299,19 +419,11 @@
       return false;
     }
 
-      /*window.onload = function () {
-      const savedUser = localStorage.getItem("user");
-      if (savedUser) {
-        const user = JSON.parse(savedUser);
-
-        if (user.role === "student") {
-          document.getElementById("login-page").style.display = "none";
-          document.getElementById("main-content").style.display = "block";
-        } else if (user.role === "professor") {
-          window.location.href = "professor_home.html";
-        }
-      }
-    };*/
+    function logoutUser() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "index.html";
+    }
   </script>
 
 </body>
