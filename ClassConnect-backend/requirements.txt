@@ -1,0 +1,10 @@
+flask>=3.0
+flask-cors
+flask-sqlalchemy
+flask-migrate
+flask-jwt-extended
+python-dotenv
+passlib[bcrypt]
+marshmallow
+marshmallow-sqlalchemy
+werkzeug

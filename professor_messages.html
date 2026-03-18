@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Messages – ClassConnect</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff8e1;
+      padding: 30px;
+      margin: 0;
+    }
+
+    h1 {
+      color: #e67e22;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .message-card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .message-card p {
+      margin: 5px 0;
+      font-size: 16px;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      background-color: #f1c40f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background-color: #e67e22;
+    }
+
+    /* Popup Chatbox */
+    #chat-popup {
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -20%);
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      z-index: 10;
+      width: 300px;
+    }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 5;
+    }
+
+    #chat-popup h3 {
+      margin-top: 0;
+      color: #f39c12;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 8px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      resize: none;
+    }
+
+    .chat-actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Student Queries</h1>
+
+  <div class="message-card">
+    <p><strong>Student:</strong> Riya Kapoor</p>
+    <p><strong>Query:</strong> Could you please share the notes from yesterday’s class?</p>
+    <button class="btn" onclick="openChat('Riya Kapoor')">Reply</button>
+  </div>
+
+  <div class="message-card">
+    <p><strong>Student:</strong> Ankit Verma</p>
+    <p><strong>Query:</strong> I need help understanding OS scheduling algorithms.</p>
+    <button class="btn" onclick="openChat('Ankit Verma')">Reply</button>
+  </div>
+
+  <div class="message-card">
+    <p><strong>Student:</strong> Mehak Jain</p>
+    <p><strong>Query:</strong> Can I schedule a meeting after 4 PM tomorrow?</p>
+    <button class="btn" onclick="openChat('Mehak Jain')">Reply</button>
+  </div>
+
+  <!-- Overlay + Chat Popup -->
+  <div id="overlay"></div>
+  <div id="chat-popup">
+    <h3 id="chat-student-name">Reply to Student</h3>
+    <textarea placeholder="Type your reply here..."></textarea>
+    <div class="chat-actions">
+      <button class="btn" onclick="sendReply()">Send</button>
+      <button class="btn" onclick="closeChat()">Close</button>
+    </div>
+    <p id="confirmation" style="color: green; font-weight: bold;"></p>
+  </div>
+
+  <script>
+    function openChat(studentName) {
+      document.getElementById("chat-student-name").textContent = `Reply to ${studentName}`;
+      document.querySelector("#chat-popup textarea").value = '';
+      document.getElementById("confirmation").textContent = '';
+      document.getElementById("chat-popup").style.display = "block";
+      document.getElementById("overlay").style.display = "block";
+    }
+
+    function closeChat() {
+      document.getElementById("chat-popup").style.display = "none";
+      document.getElementById("overlay").style.display = "none";
+    }
+
+    function sendReply() {
+      const replyText = document.querySelector("#chat-popup textarea").value.trim();
+      if (replyText === "") {
+        document.getElementById("confirmation").textContent = "Please type a message before sending.";
+        document.getElementById("confirmation").style.color = "red";
+        return;
+      }
+
+      document.getElementById("confirmation").textContent = "Reply sent successfully.";
+      document.getElementById("confirmation").style.color = "green";
+    }
+  </script>
+
+</body>
+</html>

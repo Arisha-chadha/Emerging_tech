@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professor Home – ClassConnect</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      color: #333;
+      background-color: #fff;
+    }
+
+    .hero-section {
+      background-image: url('manipal_bg.JPG'); /* Use same background */
+      background-size: cover;
+      background-position: center;
+      height: 300px;
+      position: relative;
+    }
+
+    .overlay {
+      background: rgba(0, 0, 0, 0.5);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.5em;
+      margin: 0;
+    }
+
+    header p {
+      font-size: 1.2em;
+      margin-top: 10px;
+    }
+
+    nav {
+      background-color: #f39c12;
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 20px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .container {
+      padding: 40px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    .card {
+      background-color: #fff8e1;
+      width: 300px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h2 {
+      color: #e67e22;
+      margin-top: 0;
+    }
+
+    .btn {
+      background-color: #f1c40f;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn:hover {
+      background-color: #e67e22;
+    }
+
+    footer {
+      background-color: #f1c40f;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero-section">
+    <div class="overlay">
+      <header>
+        <h1>Welcome Professor</h1>
+        <p>Manage meetings and share knowledge with your students</p>
+      </header>
+    </div>
+  </div>
+
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">Availability</a>
+    <a href="#">Meetings</a>
+    <a href="#">Resources</a>
+    <a href="#">Messages</a>
+  </nav>
+
+  <div class="container">
+    <div class="card">
+      <h2>Manage Availability</h2>
+      <p>Update your available time slots for student meetings.</p>
+      <a href="availability.html">
+        <button class="btn">Edit Availability</button>
+      </a>
+      
+    </div>
+
+    <div class="card">
+      <h2>Accept / Reject Meetings</h2>
+      <p>View pending meeting requests and take actions.</p>
+      <a href="meeting_requests.html">
+        <button class="btn">View Requests</button>
+      </a>
+      
+    </div>
+
+    <div class="card">
+      <h2>Share Resources</h2>
+      <p>Upload notes, presentations, or links for students.</p>
+      <a href="upload_resources.html">
+        <button class="btn">Upload Resource</button>
+      </a>
+      
+    </div>
+
+    <div class="card">
+      <h2>Messages</h2>
+      <p>Respond to student queries or initiate communication.</p>
+      <a href="professor_messages.html">
+        <button class="btn">View Messages</button>
+      </a>
+      
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 ClassConnect – Manipal University Jaipur</p>
+  </footer>
+
+</body>
+</html>

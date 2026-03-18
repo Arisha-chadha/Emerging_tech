@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Available Professors</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 30px;
+      background-color: #fff8e1;
+    }
+
+    h1 {
+      text-align: center;
+      color: #e67e22;
+    }
+
+    .tab-buttons {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .tab-buttons button {
+      margin: 0 10px;
+      padding: 10px 20px;
+      background-color: #f1c40f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .tab-buttons button:hover {
+      background-color: #e67e22;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .active {
+      display: block;
+    }
+
+    .professor-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .professor-card, .meeting-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      width: 280px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .professor-card h3, .meeting-card h3 {
+      margin-bottom: 10px;
+      color: #f39c12;
+    }
+
+    .btn {
+      padding: 8px 15px;
+      background-color: #f1c40f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn:hover {
+      background-color: #e67e22;
+    }
+
+    #popup {
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -20%);
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      z-index: 10;
+      width: 320px;
+      text-align: center;
+    }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 5;
+    }
+
+    .slot {
+      display: block;
+      margin: 5px 0;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .slot:hover {
+      background-color: #f1f1f1;
+    }
+
+    .message {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .date-input {
+      margin-bottom: 10px;
+      padding: 6px;
+      width: 90%;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Professor Availability</h1>
+
+  <div class="tab-buttons">
+    <button onclick="showTab('available')">Available Professors</button>
+    <button onclick="showTab('scheduled')">Scheduled Meetings</button>
+  </div>
+
+  <!-- Available Professors Section -->
+  <div id="available" class="tab-content active">
+    <div class="professor-list" id="professor-list">
+      <!-- Dynamic professor cards will come here -->
+    </div>
+  </div>
+
+  <!-- Scheduled Meetings Section -->
+  <div id="scheduled" class="tab-content">
+    <div class="professor-list">
+      <div class="meeting-card">
+        <h3>My Scheduled Meetings</h3>
+        <p>This section can be connected to backend next.</p>
+        <p style="color: #666;"><strong>Status:</strong> Static for now</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="overlay"></div>
+  <div id="popup">
+    <h4>Select a Time Slot</h4>
+    <div id="slot-container"></div>
+    <p class="message" id="confirmationMessage"></p>
+    <br />
+    <button class="btn" onclick="closePopup()">Close</button>
+  </div>
+
+  <script>
+  const API_BASE_URL = "http://127.0.0.1:5001";
+
+  let selectedLocation = "";
+  let selectedDate = "";
+  let selectedProfessorId = null;
+  let selectedProfessorName = "";
+
+  const professorSlots = {
+    2: [
+      { label: "10:00 AM", start: "10:00", end: "11:00" },
+      { label: "11:30 AM", start: "11:30", end: "12:30" }
+    ],
+    3: [
+      { label: "2:00 PM", start: "14:00", end: "15:00" },
+      { label: "4:15 PM", start: "16:15", end: "17:15" }
+    ],
+    4: [
+      { label: "9:30 AM", start: "09:30", end: "10:30" },
+      { label: "1:00 PM", start: "13:00", end: "14:00" }
+    ]
+  };
+
+  function showTab(tabId) {
+    document.getElementById("available").classList.remove("active");
+    document.getElementById("scheduled").classList.remove("active");
+    document.getElementById(tabId).classList.add("active");
+
+    if (tabId === "scheduled") {
+      loadMyMeetings();
+    }
+  }
+
+  function openPopup(professorId, professorName, location, dateInputId) {
+    selectedProfessorId = professorId;
+    selectedProfessorName = professorName;
+    selectedLocation = location || "TBD";
+    selectedDate = document.getElementById(dateInputId).value;
+
+    if (!selectedDate) {
+      alert("Please select a date first.");
+      return;
+    }
+
+    const slots = professorSlots[professorId] || [
+      { label: "10:00 AM", start: "10:00", end: "11:00" },
+      { label: "11:30 AM", start: "11:30", end: "12:30" }
+    ];
+
+    const slotContainer = document.getElementById("slot-container");
+    slotContainer.innerHTML = "";
+
+    slots.forEach(slot => {
+      const span = document.createElement("span");
+      span.className = "slot";
+      span.textContent = slot.label;
+      span.onclick = () => selectTime(slot.start, slot.end, slot.label);
+      slotContainer.appendChild(span);
+    });
+
+    document.getElementById("popup").style.display = "block";
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("confirmationMessage").textContent = "";
+    document.querySelector("#popup h4").textContent = `Select a Time Slot for ${selectedProfessorName}`;
+  }
+
+  function closePopup() {
+    document.getElementById("popup").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+  }
+
+  async function selectTime(startTime, endTime, label) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login first.");
+      window.location.href = "index.html";
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/meetings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          professor_id: selectedProfessorId,
+          date: selectedDate,
+          start_time: startTime,
+          end_time: endTime,
+          location: selectedLocation,
+          agenda: `Meeting with ${selectedProfessorName}`
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        document.getElementById("confirmationMessage").textContent =
+          result.message || "Failed to request meeting.";
+        return;
+      }
+
+      document.getElementById("confirmationMessage").textContent =
+        `Meeting requested with ${selectedProfessorName} on ${selectedDate} at ${label}. Waiting for professor's confirmation.`;
+
+      loadMyMeetings();
+    } catch (error) {
+      console.error("Meeting request error:", error);
+      document.getElementById("confirmationMessage").textContent =
+        "Error sending meeting request.";
+    }
+  }
+
+  async function loadProfessors() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/users/professors`);
+      const result = await response.json();
+
+      const container = document.getElementById("professor-list");
+      container.innerHTML = "";
+
+      if (!result.data || result.data.length === 0) {
+        container.innerHTML = "<p>No professors found.</p>";
+        return;
+      }
+
+      result.data.forEach((prof, index) => {
+        const card = document.createElement("div");
+        card.className = "professor-card";
+
+        const dateId = `date${index + 1}`;
+        const professorLocations = {
+          2: "LHC 304 B",
+          3: "AB2 210",
+          4: "LHC 212 A"
+        };
+        const location = prof.cabin_location || professorLocations[prof.id] || "LHC 101";
+
+        card.innerHTML = `
+          <h3>${prof.name}</h3>
+          <p><strong>Email:</strong> ${prof.email}</p>
+          <p><strong>Location:</strong> ${location}</p>
+          <input type="date" class="date-input" id="${dateId}" />
+          <button class="btn" onclick="openPopup(${prof.id}, '${prof.name.replace(/'/g, "\\'")}', '${location.replace(/'/g, "\\'")}', '${dateId}')">Schedule Meet</button>
+        `;
+
+        container.appendChild(card);
+      });
+    } catch (error) {
+      console.error("Error loading professors:", error);
+      document.getElementById("professor-list").innerHTML =
+        "<p>Failed to load professors from backend.</p>";
+    }
+  }
+
+  async function loadMyMeetings() {
+    const token = localStorage.getItem("token");
+    const scheduledContainer = document.querySelector("#scheduled .professor-list");
+
+    if (!token) {
+      scheduledContainer.innerHTML = "<p>Please login first.</p>";
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/meetings/mine`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      const result = await response.json();
+      scheduledContainer.innerHTML = "";
+
+      if (!response.ok) {
+        scheduledContainer.innerHTML = `<p>${result.message || "Failed to load meetings."}</p>`;
+        return;
+      }
+
+      const meetings = result.data || [];
+
+      if (meetings.length === 0) {
+        scheduledContainer.innerHTML = "<p>No meetings requested yet.</p>";
+        return;
+      }
+
+      meetings.forEach(meeting => {
+        const card = document.createElement("div");
+        card.className = "meeting-card";
+
+        card.innerHTML = `
+          <h3>${meeting.professor?.name || "Professor"}</h3>
+          <p>Date: ${meeting.date || "N/A"}</p>
+          <p>Time: ${meeting.start_time || "N/A"} - ${meeting.end_time || "N/A"}</p>
+          <p>Location: ${meeting.location || "TBD"}</p>
+          <p><strong>Status:</strong> ${meeting.status || "pending"}</p>
+        `;
+
+        scheduledContainer.appendChild(card);
+      });
+    } catch (error) {
+      console.error("Error loading student meetings:", error);
+      scheduledContainer.innerHTML = "<p>Error loading meetings.</p>";
+    }
+  }
+
+  window.onload = function () {
+    loadProfessors();
+    loadMyMeetings();
+  };
+</script>
+
+</body>
+</html>
