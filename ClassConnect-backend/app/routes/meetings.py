@@ -9,13 +9,36 @@ from ..utils import api_response, current_user_id, current_user_role
 meetings_bp = Blueprint("meetings", __name__, url_prefix="/api/meetings")
 
 
+def is_professor_for_meeting(meeting):
+    role = (current_user_role() or "").strip().lower()
+    uid = current_user_id()
+
+    print("=== MEETING AUTH DEBUG ===")
+    print("ROLE:", role)
+    print("CURRENT USER ID:", uid)
+    print("MEETING ID:", meeting.id)
+    print("MEETING PROFESSOR ID:", meeting.professor_id)
+    print("MEETING STATUS:", meeting.status)
+
+    if role != "professor":
+        return False, "only professors can perform this action"
+
+    if meeting.professor_id != uid:
+        return False, "this meeting does not belong to the logged-in professor"
+
+    return True, ""
+
+
 @meetings_bp.post("")
 @jwt_required()
 def create_meeting():
-    if current_user_role() != "student":
+    role = (current_user_role() or "").strip().lower()
+
+    if role != "student":
         return api_response(None, "only students can request meetings", 403)
 
     payload = request.get_json() or {}
+
     try:
         meeting = Meeting(
             student_id=current_user_id(),
@@ -42,7 +65,9 @@ def create_meeting():
 @meetings_bp.get("/incoming")
 @jwt_required()
 def incoming_for_prof():
-    if current_user_role() != "professor":
+    role = (current_user_role() or "").strip().lower()
+
+    if role != "professor":
         return api_response(None, "only professors", 403)
 
     ms = (
@@ -57,14 +82,15 @@ def incoming_for_prof():
 @meetings_bp.get("/mine")
 @jwt_required()
 def my_meetings():
-    role = current_user_role()
+    role = (current_user_role() or "").strip().lower()
     uid = current_user_id()
-    query = Meeting.query
 
     if role == "student":
-        query = query.filter_by(student_id=uid)
+        query = Meeting.query.filter_by(student_id=uid)
+    elif role == "professor":
+        query = Meeting.query.filter_by(professor_id=uid)
     else:
-        query = query.filter_by(professor_id=uid)
+        return api_response(None, "invalid user role", 403)
 
     ms = query.order_by(Meeting.date.desc(), Meeting.start_time.desc()).all()
     return api_response(meetings_schema.dump(ms))
@@ -75,8 +101,12 @@ def my_meetings():
 def accept_meeting(meeting_id):
     m = Meeting.query.get_or_404(meeting_id)
 
-    if current_user_role() != "professor" or m.professor_id != current_user_id():
-        return api_response(None, "forbidden", 403)
+    allowed, message = is_professor_for_meeting(m)
+    if not allowed:
+        return api_response(None, message, 403)
+
+    if m.status == "rejected":
+        return api_response(None, "rejected meetings cannot be accepted", 400)
 
     m.status = "confirmed"
     m.last_updated_by = "professor"
@@ -91,8 +121,9 @@ def accept_meeting(meeting_id):
 def reject_meeting(meeting_id):
     m = Meeting.query.get_or_404(meeting_id)
 
-    if current_user_role() != "professor" or m.professor_id != current_user_id():
-        return api_response(None, "forbidden", 403)
+    allowed, message = is_professor_for_meeting(m)
+    if not allowed:
+        return api_response(None, message, 403)
 
     m.status = "rejected"
     m.last_updated_by = "professor"
@@ -107,8 +138,9 @@ def reject_meeting(meeting_id):
 def reschedule(meeting_id):
     m = Meeting.query.get_or_404(meeting_id)
 
-    if current_user_role() != "professor" or m.professor_id != current_user_id():
-        return api_response(None, "forbidden", 403)
+    allowed, message = is_professor_for_meeting(m)
+    if not allowed:
+        return api_response(None, message, 403)
 
     payload = request.get_json() or {}
 
@@ -129,7 +161,7 @@ def reschedule(meeting_id):
             schedule_changed = True
 
         if "location" in payload and payload["location"]:
-            m.location = payload["location"]
+            m.location = payload["location"].strip()
             location_changed = True
 
     except Exception:

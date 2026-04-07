@@ -20,4 +20,5 @@ def current_user_id():
 
 def current_user_role():
     claims = get_jwt() or {}
-    return claims.get("role")
+    role = claims.get("role")
+    return role.strip().lower() if isinstance(role, str) else None
