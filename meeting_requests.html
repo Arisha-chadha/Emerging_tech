@@ -93,18 +93,37 @@
       document.getElementById(sectionId).classList.add("active");
     }
 
-    function getToken() {
-      return localStorage.getItem("token");
+    function getProfessorToken() {
+      return localStorage.getItem("professorToken");
+    }
+
+    function getProfessorUser() {
+      const raw = localStorage.getItem("professorUser");
+      return raw ? JSON.parse(raw) : null;
+    }
+
+    function ensureProfessorLoggedIn() {
+      const token = getProfessorToken();
+      const user = getProfessorUser();
+
+      if (!token || !user || (user.role || "").toLowerCase() !== "professor") {
+        alert("Please login as professor first.");
+        window.location.href = "index.html";
+        return false;
+      }
+
+      return true;
     }
 
     async function loadIncomingRequests() {
-      const token = getToken();
       const container = document.getElementById("incoming-requests-container");
 
-      if (!token) {
+      if (!ensureProfessorLoggedIn()) {
         container.innerHTML = '<p class="empty-msg">Please login as professor first.</p>';
         return;
       }
+
+      const token = getProfessorToken();
 
       try {
         const response = await fetch(`${API_BASE_URL}/api/meetings/incoming`, {
@@ -161,13 +180,14 @@
     }
 
     async function loadMyMeetings() {
-      const token = getToken();
       const container = document.getElementById("scheduled-meetings-container");
 
-      if (!token) {
+      if (!ensureProfessorLoggedIn()) {
         container.innerHTML = '<p class="empty-msg">Please login as professor first.</p>';
         return;
       }
+
+      const token = getProfessorToken();
 
       try {
         const response = await fetch(`${API_BASE_URL}/api/meetings/mine`, {
@@ -239,7 +259,9 @@
     }
 
     async function updateMeetingStatus(meetingId, action) {
-      const token = getToken();
+      if (!ensureProfessorLoggedIn()) return;
+
+      const token = getProfessorToken();
 
       try {
         const response = await fetch(`${API_BASE_URL}/api/meetings/${meetingId}/${action}`, {
@@ -259,10 +281,7 @@
         alert(`Meeting ${action}ed successfully.`);
         await loadIncomingRequests();
         await loadMyMeetings();
-
-        if (action === "accept" || action === "reject") {
-          showSection('requests');
-        }
+        showSection('scheduled');
 
       } catch (error) {
         console.error(error);
@@ -271,10 +290,12 @@
     }
 
     async function changeLocation(meetingId) {
-      const token = getToken();
+      if (!ensureProfessorLoggedIn()) return;
+
+      const token = getProfessorToken();
       const newLocation = prompt("Enter new location:");
 
-      if (!token || !newLocation || !newLocation.trim()) return;
+      if (!newLocation || !newLocation.trim()) return;
 
       try {
         const response = await fetch(`${API_BASE_URL}/api/meetings/${meetingId}/reschedule`, {
@@ -307,7 +328,9 @@
     }
 
     async function rescheduleMeeting(meetingId) {
-      const token = getToken();
+      if (!ensureProfessorLoggedIn()) return;
+
+      const token = getProfessorToken();
 
       const newDate = prompt("Enter new date (YYYY-MM-DD):");
       if (!newDate) return;
@@ -355,7 +378,9 @@
     }
 
     async function rejectConfirmedMeeting(meetingId) {
-      const token = getToken();
+      if (!ensureProfessorLoggedIn()) return;
+
+      const token = getProfessorToken();
 
       try {
         const response = await fetch(`${API_BASE_URL}/api/meetings/${meetingId}/reject`, {

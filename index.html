@@ -1,430 +1,83 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ClassConnect – Manipal University Jaipur</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<script>
+  const API_BASE_URL = "http://127.0.0.1:5001";
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      color: #2c3e50;
-      background: #ededed;
-      min-height: 100vh;
-    }
+  async function loginUser(event) {
+    event.preventDefault();
 
-    .hero-section {
-      background-image: url('manipal_bg.JPG');
-      background-size: cover;
-      background-position: center;;
-      height: 340px;
-      position: relative;
-    }
+    const selectedRole = document.getElementById("role").value;
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-    .overlay {
-      background: rgba(0, 0, 0, 0.52);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: #fff;
-      text-align: center;
-      padding: 20px;
-    }
+    const errorBox = document.getElementById("error-message");
+    const successBox = document.getElementById("success-message");
 
-    .overlay h1 {
-      font-size: 3rem;
-      margin: 0;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-    }
+    errorBox.textContent = "";
+    successBox.textContent = "";
 
-    .overlay p {
-      font-size: 1.1rem;
-      margin-top: 14px;
-      max-width: 760px;
-      line-height: 1.5;
-    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password
+        })
+      });
 
-   nav {
-    background: #f39c12;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 36px;
-    padding: 14px 20px;   /* increased from 12 → 14 */
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.10);
-    flex-wrap: wrap;
-  }
+      const result = await response.json();
 
-    nav a,
-    nav button {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 15px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    nav a:hover,
-    nav button:hover {
-      opacity: 0.85;
-      transform: translateY(-1px);
-    }
-
-    #main-content {
-      display: none;
-      min-height: 100vh;
-      flex-direction: column;
-    }
-
-    .dashboard-section {
-      background: #ededed;
-      padding: 48px 20px 64px;
-      flex: 1;
-    }
-
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 24px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    .card {
-      background: #f7f0da;
-      width: 290px;
-      min-height: 210px;
-      padding: 22px 20px;
-      border-radius: 16px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      border: 1px solid #efe2b8;
-    }
-
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
-    }
-
-    .card h2 {
-      color: #e67e22;
-      margin: 0 0 10px 0;
-      font-size: 1.7rem;
-      line-height: 1.1;
-    }
-
-    .card p {
-      font-size: 0.98rem;
-      line-height: 1.45;
-      margin: 0 0 16px 0;
-      color: #4b5563;
-    }
-
-    .btn,
-    .login-btn {
-      background: #f1c40f;
-      color: white;
-      padding: 10px 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
-      transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .btn:hover,
-    .login-btn:hover {
-      background: #e67e22;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 14px rgba(230, 126, 34, 0.22);
-    }
-
-    .card a {
-      text-decoration: none;
-    }
-
-    footer {
-      background: #f39c12;
-      color: white;
-      text-align: center;
-      padding: 12px;
-      font-size: 0.95rem;
-      margin-top: auto;
-    }
-
-    #login-page {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      background:
-        linear-gradient(rgba(0,0,0,0.42), rgba(0,0,0,0.42)),
-        url('manipal_bg.JPG') center/cover no-repeat;
-      padding: 20px;
-    }
-
-    .login-title {
-      color: white;
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .login-title h2 {
-      font-size: 2.4rem;
-      margin: 0;
-    }
-
-    .login-title p {
-      margin-top: 10px;
-      font-size: 1.05rem;
-      color: #fdf2d0;
-    }
-
-    #login-form {
-      display: flex;
-      flex-direction: column;
-      background: rgba(255, 255, 255, 0.97);
-      padding: 32px 28px;
-      border-radius: 18px;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
-      width: 360px;
-      backdrop-filter: blur(4px);
-    }
-
-    #login-form label {
-      margin-top: 12px;
-      margin-bottom: 6px;
-      font-weight: bold;
-      color: #374151;
-    }
-
-    #login-form select,
-    #login-form input {
-      padding: 11px 12px;
-      border-radius: 8px;
-      border: 1px solid #d1d5db;
-      font-size: 15px;
-      outline: none;
-    }
-
-    #login-form select:focus,
-    #login-form input:focus {
-      border-color: #e67e22;
-      box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.12);
-    }
-
-    #error-message {
-      color: #dc2626;
-      font-size: 14px;
-      margin-top: 12px;
-      min-height: 18px;
-      text-align: center;
-      font-weight: 600;
-    }
-
-    #success-message {
-      color: #15803d;
-      font-size: 14px;
-      margin-top: 12px;
-      min-height: 18px;
-      text-align: center;
-      font-weight: 600;
-    }
-
-    @media (max-width: 768px) {
-      .overlay h1 {
-        font-size: 2.2rem;
+      if (!response.ok) {
+        errorBox.textContent = result.message || "Login failed.";
+        return false;
       }
 
-      .overlay p {
-        font-size: 1rem;
+      const user = result.data.user;
+      const token = result.data.token;
+
+      if (selectedRole !== user.role) {
+        errorBox.textContent = `This account is registered as ${user.role}, but you selected ${selectedRole}.`;
+        return false;
       }
 
-      .card {
-        width: 100%;
-        max-width: 340px;
-      }
-
-      #login-form {
-        width: 100%;
-        max-width: 360px;
-      }
-
-      nav {
-        gap: 20px;
-      }
-    }
-  </style>
-</head>
-<body>
-
-  <div id="login-page">
-    <div class="login-title">
-      <h2>Welcome to ClassConnect</h2>
-      <p>Sign in to access your academic scheduling and collaboration portal.</p>
-    </div>
-
-    <form id="login-form" onsubmit="return loginUser(event)">
-      <label for="role">I am a:</label>
-      <select id="role" required>
-        <option value="" disabled selected>Select role</option>
-        <option value="student">Student</option>
-        <option value="professor">Professor</option>
-      </select>
-
-      <label for="email">Email:</label>
-      <input type="email" id="email" placeholder="Enter your email" required />
-
-      <label for="password">Password:</label>
-      <input type="password" id="password" placeholder="Enter your password" required />
-
-      <br />
-      <button type="submit" class="login-btn">Login</button>
-      <div id="error-message"></div>
-      <div id="success-message"></div>
-    </form>
-  </div>
-
-  <div id="main-content">
-    <div class="hero-section">
-      <div class="overlay">
-        <h1>Welcome to ClassConnect</h1>
-        <p>Connecting Students and Professors at Manipal University Jaipur</p>
-      </div>
-    </div>
-
-    <nav>
-      <a href="available_professors.html">Scheduling</a>
-      <a href="messages.html">Messages</a>
-      <a href="resources.html">Resources</a>
-      <button onclick="logoutUser()">Logout</button>
-    </nav>
-
-    <section class="dashboard-section">
-      <div class="container">
-      <div class="card">
-  <div>
-    <h2>Schedule Meetings</h2>
-    <p>Book meetings with professors based on availability.</p>
-  </div>
-  <a href="available_professors.html">
-    <button class="btn">View Available Professors</button>
-  </a>
-</div>
-
-<div class="card">
-  <div>
-    <h2>Messages</h2>
-    <p>View and manage conversations with professors.</p>
-  </div>
-  <a href="messages.html">
-    <button class="btn">Check Messages</button>
-  </a>
-</div>
-
-<div class="card">
-  <div>
-    <h2>Resources</h2>
-    <p>Access notes, materials, and shared academic files.</p>
-  </div>
-  <a href="resources.html">
-    <button class="btn">Browse Resources</button>
-  </a>
-</div>
-      </div>
-    </section>
-
-    <footer>
-      <p>&copy; 2026 ClassConnect – Manipal University Jaipur</p>
-    </footer>
-  </div>
-
-  <script>
-    const API_BASE_URL = "http://127.0.0.1:5001";
-
-    async function loginUser(event) {
-      event.preventDefault();
-
-      const selectedRole = document.getElementById("role").value;
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-
-      const errorBox = document.getElementById("error-message");
-      const successBox = document.getElementById("success-message");
-
-      errorBox.textContent = "";
-      successBox.textContent = "";
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            email: email,
-            password: password
-          })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          errorBox.textContent = result.message || "Login failed.";
-          return false;
-        }
-
-        const user = result.data.user;
-        const token = result.data.token;
-
-        if (selectedRole !== user.role) {
-          errorBox.textContent = `This account is registered as ${user.role}, but you selected ${selectedRole}.`;
-          return false;
-        }
-
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
-
-        successBox.textContent = "Login successful!";
-
-        if (user.role === "student") {
-          document.getElementById("login-page").style.display = "none";
-          document.getElementById("main-content").style.display = "flex";
-        } else if (user.role === "professor") {
-          window.location.href = "professor_home.html";
-        }
-
-      } catch (error) {
-        console.error("Login error:", error);
-        errorBox.textContent = "Unable to connect to server.";
-      }
-
-      return false;
-    }
-
-    function logoutUser() {
+      // remove old generic keys if they exist
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      window.location.href = "index.html";
-    }
-  </script>
 
-</body>
-</html>
+      // store separate keys for each role
+      if (user.role === "student") {
+        localStorage.setItem("studentToken", token);
+        localStorage.setItem("studentUser", JSON.stringify(user));
+      } else if (user.role === "professor") {
+        localStorage.setItem("professorToken", token);
+        localStorage.setItem("professorUser", JSON.stringify(user));
+      }
+
+      successBox.textContent = "Login successful!";
+
+      if (user.role === "student") {
+        document.getElementById("login-page").style.display = "none";
+        document.getElementById("main-content").style.display = "flex";
+      } else if (user.role === "professor") {
+        window.location.href = "professor_home.html";
+      }
+
+    } catch (error) {
+      console.error("Login error:", error);
+      errorBox.textContent = "Unable to connect to server.";
+    }
+
+    return false;
+  }
+
+  function logoutUser() {
+    localStorage.removeItem("studentToken");
+    localStorage.removeItem("studentUser");
+    localStorage.removeItem("professorToken");
+    localStorage.removeItem("professorUser");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "index.html";
+  }
+</script>
