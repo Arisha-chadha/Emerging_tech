@@ -205,7 +205,7 @@
           return;
         }
 
-        const meetings = result.data || [];
+        const meetings = (result.data || []).filter(meeting => meeting.status === "confirmed");
 
         if (meetings.length === 0) {
           container.innerHTML = '<p class="empty-msg">No meetings found.</p>';

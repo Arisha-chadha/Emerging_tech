@@ -13,7 +13,6 @@ body {
   padding: 20px;
 }
 
-/* Layout */
 .chat-layout {
   display: flex;
   gap: 20px;
@@ -21,7 +20,6 @@ body {
   margin: auto;
 }
 
-/* Left panel */
 #user-list {
   width: 260px;
   background: #f7f0da;
@@ -43,7 +41,6 @@ body {
   text-align: left;
 }
 
-/* Chat panel */
 .chat-panel {
   flex: 1;
   background: #f7f0da;
@@ -63,7 +60,6 @@ body {
   margin-bottom: 14px;
 }
 
-/* Messages */
 .msg {
   margin-bottom: 10px;
   max-width: 70%;
@@ -90,7 +86,6 @@ body {
   color: #2c3e50;
 }
 
-/* Input */
 .chat-input-row {
   display: flex;
   gap: 10px;
@@ -120,14 +115,10 @@ body {
 <h2 style="text-align:center; color:#e67e22;">Messages</h2>
 
 <div class="chat-layout">
-
-  <!-- LEFT: Professors -->
   <div id="user-list"></div>
 
-  <!-- RIGHT: Chat -->
   <div class="chat-panel">
     <h3 id="chat-title">Select a professor</h3>
-
     <div id="chat-box"></div>
 
     <div class="chat-input-row">
@@ -135,99 +126,146 @@ body {
       <button onclick="sendMessage()">Send</button>
     </div>
   </div>
-
 </div>
 
 <script>
 const API_BASE_URL = "http://127.0.0.1:5001";
 let selectedUserId = null;
+let refreshInterval = null;
 
-/* LOAD PROFESSORS */
-async function loadProfessors() {
-  const res = await fetch(`${API_BASE_URL}/api/users/professors`);
-  const result = await res.json();
-
-  const list = document.getElementById("user-list");
-  list.innerHTML = "";
-
-  (result.data || []).forEach(prof => {
-    const btn = document.createElement("button");
-    btn.textContent = prof.name;
-    btn.className = "user-btn";
-
-    btn.onclick = () => {
-      selectedUserId = prof.id;
-      document.getElementById("chat-title").textContent = "Chat with " + prof.name;
-      loadMessages();
-    };
-
-    list.appendChild(btn);
-  });
+function getStudentToken() {
+  return localStorage.getItem("studentToken");
 }
 
-/* LOAD CHAT */
-async function loadMessages() {
-  const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user"));
+function getStudentUser() {
+  const raw = localStorage.getItem("studentUser");
+  return raw ? JSON.parse(raw) : null;
+}
 
+function ensureStudentLoggedIn() {
+  const token = getStudentToken();
+  const user = getStudentUser();
+
+  if (!token || !user || (user.role || "").toLowerCase() !== "student") {
+    alert("Please login as student first.");
+    window.location.href = "index.html";
+    return false;
+  }
+
+  return true;
+}
+
+async function loadProfessors() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/users/professors`);
+    const result = await res.json();
+
+    const list = document.getElementById("user-list");
+    list.innerHTML = "";
+
+    (result.data || []).forEach(prof => {
+      const btn = document.createElement("button");
+      btn.textContent = prof.name;
+      btn.className = "user-btn";
+
+      btn.onclick = () => {
+        selectedUserId = prof.id;
+        document.getElementById("chat-title").textContent = "Chat with " + prof.name;
+        loadMessages();
+      };
+
+      list.appendChild(btn);
+    });
+  } catch (error) {
+    console.error("Error loading professors:", error);
+    document.getElementById("user-list").innerHTML = "<p>Failed to load professors.</p>";
+  }
+}
+
+async function loadMessages() {
+  if (!ensureStudentLoggedIn()) return;
   if (!selectedUserId) return;
 
-  const res = await fetch(
-    `${API_BASE_URL}/api/messages/thread?with_user_id=${selectedUserId}`,
-    {
-      headers: {
-        "Authorization": `Bearer ${token}`
+  const token = getStudentToken();
+  const user = getStudentUser();
+
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/messages/thread?with_user_id=${selectedUserId}`,
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
       }
-    }
-  );
+    );
 
-  const result = await res.json();
-  const chatBox = document.getElementById("chat-box");
-  chatBox.innerHTML = "";
+    const result = await res.json();
+    const chatBox = document.getElementById("chat-box");
+    chatBox.innerHTML = "";
 
-  (result.data || []).forEach(msg => {
-    const div = document.createElement("div");
-
-    if (msg.sender.id === user.id) {
-      div.className = "msg me";
-    } else {
-      div.className = "msg other";
+    if (!res.ok) {
+      chatBox.innerHTML = `<p>${result.message || "Failed to load messages."}</p>`;
+      return;
     }
 
-    div.innerHTML = `<p>${msg.body}</p>`;
-    chatBox.appendChild(div);
-  });
+    (result.data || []).forEach(msg => {
+      const div = document.createElement("div");
+      div.className = msg.sender?.id === user.id ? "msg me" : "msg other";
+      div.innerHTML = `<p>${msg.body}</p>`;
+      chatBox.appendChild(div);
+    });
 
-  chatBox.scrollTop = chatBox.scrollHeight;
+    chatBox.scrollTop = chatBox.scrollHeight;
+  } catch (error) {
+    console.error("Error loading messages:", error);
+  }
 }
 
-/* SEND MESSAGE */
 async function sendMessage() {
-  const token = localStorage.getItem("token");
+  if (!ensureStudentLoggedIn()) return;
+
+  const token = getStudentToken();
   const text = document.getElementById("msg-input").value.trim();
 
   if (!selectedUserId || !text) return;
 
-  await fetch(`${API_BASE_URL}/api/messages`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      recipient_id: selectedUserId,
-      body: text
-    })
-  });
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        recipient_id: selectedUserId,
+        body: text
+      })
+    });
 
-  document.getElementById("msg-input").value = "";
-  loadMessages();
+    const result = await res.json();
+
+    if (!res.ok) {
+      alert(result.message || "Failed to send message");
+      return;
+    }
+
+    document.getElementById("msg-input").value = "";
+    await loadMessages();
+  } catch (error) {
+    console.error("Send message error:", error);
+    alert("Error sending message.");
+  }
 }
 
-/* INIT */
 window.onload = function () {
+  if (!ensureStudentLoggedIn()) return;
+
   loadProfessors();
-  setInterval(loadMessages, 2000); // auto refresh
+
+  if (refreshInterval) clearInterval(refreshInterval);
+  refreshInterval = setInterval(() => {
+    if (selectedUserId) loadMessages();
+  }, 2000);
 };
 </script>
 
