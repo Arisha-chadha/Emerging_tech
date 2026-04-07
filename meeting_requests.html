@@ -257,8 +257,12 @@
         }
 
         alert(`Meeting ${action}ed successfully.`);
-        loadIncomingRequests();
-        loadMyMeetings();
+        await loadIncomingRequests();
+        await loadMyMeetings();
+
+        if (action === "accept" || action === "reject") {
+          showSection('requests');
+        }
 
       } catch (error) {
         console.error(error);
@@ -292,8 +296,10 @@
         }
 
         alert("Location updated successfully.");
-        loadIncomingRequests();
-        loadMyMeetings();
+        await loadIncomingRequests();
+        await loadMyMeetings();
+        showSection('scheduled');
+
       } catch (error) {
         console.error(error);
         alert("Error updating location.");
@@ -326,7 +332,7 @@
             date: newDate,
             start_time: newStart,
             end_time: newEnd,
-            location: newLocation
+            location: newLocation.trim()
           })
         });
 
@@ -338,8 +344,10 @@
         }
 
         alert("Meeting updated successfully.");
-        loadIncomingRequests();
-        loadMyMeetings();
+        await loadIncomingRequests();
+        await loadMyMeetings();
+        showSection('scheduled');
+
       } catch (error) {
         console.error(error);
         alert("Error updating meeting.");
@@ -365,8 +373,10 @@
         }
 
         alert("Meeting rejected successfully.");
-        loadIncomingRequests();
-        loadMyMeetings();
+        await loadIncomingRequests();
+        await loadMyMeetings();
+        showSection('scheduled');
+
       } catch (error) {
         console.error(error);
         alert("Error rejecting meeting.");
@@ -374,6 +384,7 @@
     }
 
     window.onload = function() {
+      showSection('requests');
       loadIncomingRequests();
       loadMyMeetings();
     };

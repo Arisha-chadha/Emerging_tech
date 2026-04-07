@@ -13,13 +13,6 @@ def is_professor_for_meeting(meeting):
     role = (current_user_role() or "").strip().lower()
     uid = current_user_id()
 
-    print("=== MEETING AUTH DEBUG ===")
-    print("ROLE:", role)
-    print("CURRENT USER ID:", uid)
-    print("MEETING ID:", meeting.id)
-    print("MEETING PROFESSOR ID:", meeting.professor_id)
-    print("MEETING STATUS:", meeting.status)
-
     if role != "professor":
         return False, "only professors can perform this action"
 
@@ -38,7 +31,6 @@ def create_meeting():
         return api_response(None, "only students can request meetings", 403)
 
     payload = request.get_json() or {}
-
     try:
         meeting = Meeting(
             student_id=current_user_id(),
@@ -105,9 +97,6 @@ def accept_meeting(meeting_id):
     if not allowed:
         return api_response(None, message, 403)
 
-    if m.status == "rejected":
-        return api_response(None, "rejected meetings cannot be accepted", 400)
-
     m.status = "confirmed"
     m.last_updated_by = "professor"
     m.update_note = "Meeting accepted by Professor"
@@ -148,24 +137,28 @@ def reschedule(meeting_id):
         schedule_changed = False
         location_changed = False
 
-        if "date" in payload and payload["date"]:
+        if payload.get("date"):
             m.date = datetime.strptime(payload["date"], "%Y-%m-%d").date()
             schedule_changed = True
 
-        if "start_time" in payload and payload["start_time"]:
+        if payload.get("start_time"):
             m.start_time = datetime.strptime(payload["start_time"], "%H:%M").time()
             schedule_changed = True
 
-        if "end_time" in payload and payload["end_time"]:
+        if payload.get("end_time"):
             m.end_time = datetime.strptime(payload["end_time"], "%H:%M").time()
             schedule_changed = True
 
-        if "location" in payload and payload["location"]:
+        if payload.get("location"):
             m.location = payload["location"].strip()
             location_changed = True
 
     except Exception:
         return api_response(None, "bad date/time format", 400)
+
+    # keep meeting active/confirmed after professor edits
+    if m.status != "rejected":
+        m.status = "confirmed"
 
     m.last_updated_by = "professor"
 
