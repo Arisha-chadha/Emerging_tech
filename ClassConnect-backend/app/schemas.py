@@ -51,9 +51,12 @@ class MessageSchema(Schema):
 class ResourceSchema(Schema):
     id = fields.Int(dump_only=True)
     uploader = fields.Nested(UserSchema, dump_only=True)
+
+    year = fields.Str(required=True)
+    branch = fields.Str(required=True)
     subject = fields.Str(required=True)
-    course = fields.Str()
-    semester = fields.Str()
+    section = fields.Str(required=True)
+
     filename = fields.Str(dump_only=True)
     url = fields.Str(dump_only=True)
     created_at = fields.DateTime(dump_only=True)

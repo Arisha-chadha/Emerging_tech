@@ -72,9 +72,12 @@ class Resource(TimestampMixin, db.Model):
     __tablename__ = "resources"
     id = db.Column(db.Integer, primary_key=True)
     uploader_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    year = db.Column(db.String(20), nullable=False)
+    branch = db.Column(db.String(120), nullable=False)
     subject = db.Column(db.String(120), nullable=False)
-    course = db.Column(db.String(120), nullable=True)
-    semester = db.Column(db.String(50), nullable=True)
+    section = db.Column(db.String(20), nullable=False)
+
     filename = db.Column(db.String(255), nullable=False)
     url = db.Column(db.String(500), nullable=False)
 
