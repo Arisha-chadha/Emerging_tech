@@ -51,14 +51,13 @@
       line-height: 1.5;
     }
 
-    /* DARKER NAVBAR */
     nav {
-      background: #e67e22;
+      background: #f39c12;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 36px;
-      padding: 12px 20px;
+      padding: 14px 20px;
       box-shadow: 0 3px 10px rgba(0, 0, 0, 0.10);
       flex-wrap: wrap;
     }
@@ -160,13 +159,12 @@
       text-decoration: none;
     }
 
-    /* SMALLER DARKER FOOTER */
     footer {
-      background: #e67e22;
+      background: #f39c12;
       color: white;
       text-align: center;
-      padding: 8px 10px;
-      font-size: 0.85rem;
+      padding: 12px;
+      font-size: 0.95rem;
       margin-top: auto;
     }
 
@@ -276,3 +274,169 @@
   </style>
 </head>
 <body>
+
+  <div id="login-page">
+    <div class="login-title">
+      <h2>Welcome to ClassConnect</h2>
+      <p>Sign in to access your academic scheduling and collaboration portal.</p>
+    </div>
+
+    <form id="login-form" onsubmit="return loginUser(event)">
+      <label for="role">I am a:</label>
+      <select id="role" required>
+        <option value="" disabled selected>Select role</option>
+        <option value="student">Student</option>
+        <option value="professor">Professor</option>
+      </select>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" placeholder="Enter your email" required />
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" placeholder="Enter your password" required />
+
+      <br />
+      <button type="submit" class="login-btn">Login</button>
+      <div id="error-message"></div>
+      <div id="success-message"></div>
+    </form>
+  </div>
+
+  <div id="main-content">
+    <div class="hero-section">
+      <div class="overlay">
+        <h1>Welcome to ClassConnect</h1>
+        <p>Connecting Students and Professors at Manipal University Jaipur</p>
+      </div>
+    </div>
+
+    <nav>
+      <a href="available_professors.html">Scheduling</a>
+      <a href="messages.html">Messages</a>
+      <a href="resources.html">Resources</a>
+      <button onclick="logoutUser()">Logout</button>
+    </nav>
+
+    <section class="dashboard-section">
+      <div class="container">
+        <div class="card">
+          <div>
+            <h2>Schedule Meetings</h2>
+            <p>Book meetings with professors based on availability.</p>
+          </div>
+          <a href="available_professors.html">
+            <button class="btn">View Available Professors</button>
+          </a>
+        </div>
+
+        <div class="card">
+          <div>
+            <h2>Messages</h2>
+            <p>View and manage conversations with professors.</p>
+          </div>
+          <a href="messages.html">
+            <button class="btn">Check Messages</button>
+          </a>
+        </div>
+
+        <div class="card">
+          <div>
+            <h2>Resources</h2>
+            <p>Access notes, materials, and shared academic files.</p>
+          </div>
+          <a href="resources.html">
+            <button class="btn">Browse Resources</button>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>&copy; 2026 ClassConnect – Manipal University Jaipur</p>
+    </footer>
+  </div>
+
+  <script>
+    const API_BASE_URL = "http://127.0.0.1:5001";
+
+    async function loginUser(event) {
+      event.preventDefault();
+
+      const selectedRole = document.getElementById("role").value;
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      const errorBox = document.getElementById("error-message");
+      const successBox = document.getElementById("success-message");
+
+      errorBox.textContent = "";
+      successBox.textContent = "";
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          errorBox.textContent = result.message || "Login failed.";
+          return false;
+        }
+
+        const user = result.data.user;
+        const token = result.data.token;
+
+        if (selectedRole !== user.role) {
+          errorBox.textContent = `This account is registered as ${user.role}, but you selected ${selectedRole}.`;
+          return false;
+        }
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        if (user.role === "student") {
+          localStorage.setItem("studentToken", token);
+          localStorage.setItem("studentUser", JSON.stringify(user));
+        } else if (user.role === "professor") {
+          localStorage.setItem("professorToken", token);
+          localStorage.setItem("professorUser", JSON.stringify(user));
+        }
+
+        successBox.textContent = "Login successful!";
+
+        if (user.role === "student") {
+          document.getElementById("login-page").style.display = "none";
+          document.getElementById("main-content").style.display = "flex";
+        } else if (user.role === "professor") {
+          window.location.href = "professor_home.html";
+        }
+
+      } catch (error) {
+        console.error("Login error:", error);
+        errorBox.textContent = "Unable to connect to server.";
+      }
+
+      return false;
+    }
+
+    function logoutUser() {
+      localStorage.removeItem("studentToken");
+      localStorage.removeItem("studentUser");
+      localStorage.removeItem("professorToken");
+      localStorage.removeItem("professorUser");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "index.html";
+    }
+  </script>
+
+</body>
+</html>

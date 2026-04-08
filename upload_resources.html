@@ -19,21 +19,29 @@
     }
 
     .container {
-      max-width: 800px;
+      max-width: 650px;
       margin: auto;
     }
 
     .card {
       background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      padding: 20px;
-      margin: 20px 0;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 24px;
     }
 
-    .card p {
-      margin: 6px 0;
-      font-size: 16px;
+    label {
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
     }
 
     .btn {
@@ -41,14 +49,21 @@
       background-color: #f1c40f;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
-      margin-top: 10px;
+      margin-top: 18px;
+      width: 100%;
     }
 
     .btn:hover {
       background-color: #e67e22;
+    }
+
+    .message {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -57,36 +72,118 @@
   <h1>Upload Resources</h1>
 
   <div class="container">
-
     <div class="card">
-      <p><strong>Class:</strong> CSE - 2A</p>
-      <p><strong>Semester:</strong> 4th</p>
-      <p><strong>Subject:</strong> Data Structures</p>
-      <button class="btn">Upload Resource</button>
-    </div>
+      <form id="uploadForm">
+        <label for="year">Year</label>
+        <select id="year" required>
+          <option value="">Select Year</option>
+          <option value="1st Year">1st Year</option>
+          <option value="2nd Year">2nd Year</option>
+          <option value="3rd Year">3rd Year</option>
+          <option value="4th Year">4th Year</option>
+        </select>
 
-    <div class="card">
-      <p><strong>Class:</strong> CSE - 2B</p>
-      <p><strong>Semester:</strong> 4th</p>
-      <p><strong>Subject:</strong> Operating Systems</p>
-      <button class="btn">Upload Resource</button>
-    </div>
+        <label for="branch">Branch</label>
+        <select id="branch" required>
+          <option value="">Select Branch</option>
+          <option value="CSE">CSE</option>
+          <option value="IT">IT</option>
+          <option value="ECE">ECE</option>
+          <option value="AI/ML">AI/ML</option>
+        </select>
 
-    <div class="card">
-      <p><strong>Class:</strong> CSE - 3C</p>
-      <p><strong>Semester:</strong> 6th</p>
-      <p><strong>Subject:</strong> Artificial Intelligence</p>
-      <button class="btn">Upload Resource</button>
-    </div>
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" placeholder="Enter subject name" required />
 
-    <div class="card">
-      <p><strong>Class:</strong> IT - 1A</p>
-      <p><strong>Semester:</strong> 2nd</p>
-      <p><strong>Subject:</strong> Computer Fundamentals</p>
-      <button class="btn">Upload Resource</button>
-    </div>
+        <label for="section">Section</label>
+        <select id="section" required>
+          <option value="">Select Section</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
 
+        <label for="file">Upload File</label>
+        <input type="file" id="file" required />
+
+        <button type="submit" class="btn">Upload Resource</button>
+      </form>
+
+      <div class="message" id="msgBox"></div>
+    </div>
   </div>
+
+  <script>
+    const API_BASE_URL = "http://127.0.0.1:5001";
+
+    function getProfessorToken() {
+      return localStorage.getItem("professorToken");
+    }
+
+    function getProfessorUser() {
+      const raw = localStorage.getItem("professorUser");
+      return raw ? JSON.parse(raw) : null;
+    }
+
+    function ensureProfessorLoggedIn() {
+      const token = getProfessorToken();
+      const user = getProfessorUser();
+
+      if (!token || !user || (user.role || "").toLowerCase() !== "professor") {
+        alert("Please login as professor first.");
+        window.location.href = "index.html";
+        return false;
+      }
+      return true;
+    }
+
+    document.getElementById("uploadForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      if (!ensureProfessorLoggedIn()) return;
+
+      const token = getProfessorToken();
+      const msgBox = document.getElementById("msgBox");
+      msgBox.textContent = "";
+
+      const formData = new FormData();
+      formData.append("year", document.getElementById("year").value);
+      formData.append("branch", document.getElementById("branch").value);
+      formData.append("subject", document.getElementById("subject").value.trim());
+      formData.append("section", document.getElementById("section").value);
+      formData.append("file", document.getElementById("file").files[0]);
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/resources`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          msgBox.style.color = "red";
+          msgBox.textContent = result.message || "Upload failed.";
+          return;
+        }
+
+        msgBox.style.color = "green";
+        msgBox.textContent = "Resource uploaded successfully.";
+        document.getElementById("uploadForm").reset();
+      } catch (error) {
+        console.error(error);
+        msgBox.style.color = "red";
+        msgBox.textContent = "Error uploading resource.";
+      }
+    });
+
+    window.onload = function() {
+      ensureProfessorLoggedIn();
+    };
+  </script>
 
 </body>
 </html>

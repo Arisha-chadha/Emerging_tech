@@ -18,39 +18,76 @@
       margin-bottom: 30px;
     }
 
-    .subject-list {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-    }
-
-    .subject-card {
+    .filter-box {
+      max-width: 700px;
+      margin: 0 auto 30px;
       background: white;
-      border-radius: 10px;
       padding: 20px;
-      width: 260px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      text-align: center;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
-    .subject-card h3 {
-      color: #f39c12;
-      margin-bottom: 15px;
+    .filter-box label {
+      display: block;
+      margin-top: 12px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    .filter-box input, .filter-box select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
 
     .btn {
-      padding: 8px 15px;
+      padding: 10px 16px;
       background-color: #f1c40f;
       color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
+      margin-top: 16px;
+      width: 100%;
     }
 
     .btn:hover {
       background-color: #e67e22;
+    }
+
+    .resource-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .resource-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      width: 280px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .resource-card h3 {
+      color: #f39c12;
+      margin-top: 0;
+    }
+
+    .resource-card a {
+      text-decoration: none;
+      color: #1d4ed8;
+      font-weight: bold;
+    }
+
+    .empty-msg {
+      text-align: center;
+      color: #666;
+      margin-top: 20px;
+      width: 100%;
     }
   </style>
 </head>
@@ -58,28 +95,121 @@
 
   <h1>Academic Resources</h1>
 
-  <div class="subject-list">
-    <div class="subject-card">
-      <h3>Design & Analysis of Algorithms (DAA)</h3>
-      <button class="btn">View Resources</button>
-    </div>
-    <div class="subject-card">
-      <h3>Operating Systems (OS)</h3>
-      <button class="btn">View Resources</button>
-    </div>
-    <div class="subject-card">
-      <h3>Advanced Computer Design (ACD)</h3>
-      <button class="btn">View Resources</button>
-    </div>
-    <div class="subject-card">
-      <h3>Economics</h3>
-      <button class="btn">View Resources</button>
-    </div>
-    <div class="subject-card">
-      <h3>Open Elective (OE)</h3>
-      <button class="btn">View Resources</button>
-    </div>
+  <div class="filter-box">
+    <label for="year">Year</label>
+    <select id="year">
+      <option value="">Select Year</option>
+      <option value="1st Year">1st Year</option>
+      <option value="2nd Year">2nd Year</option>
+      <option value="3rd Year">3rd Year</option>
+      <option value="4th Year">4th Year</option>
+    </select>
+
+    <label for="branch">Branch</label>
+    <select id="branch">
+      <option value="">Select Branch</option>
+      <option value="CSE">CSE</option>
+      <option value="IT">IT</option>
+      <option value="ECE">ECE</option>
+      <option value="AI/ML">AI/ML</option>
+    </select>
+
+    <label for="subject">Subject</label>
+    <input type="text" id="subject" placeholder="Enter subject name" />
+
+    <label for="section">Section</label>
+    <select id="section">
+      <option value="">Select Section</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+      <option value="C">C</option>
+    </select>
+
+    <button class="btn" onclick="loadResources()">View Resources</button>
   </div>
+
+  <div class="resource-list" id="resource-list"></div>
+
+  <script>
+    const API_BASE_URL = "http://127.0.0.1:5001";
+
+    function getStudentToken() {
+      return localStorage.getItem("studentToken");
+    }
+
+    function getStudentUser() {
+      const raw = localStorage.getItem("studentUser");
+      return raw ? JSON.parse(raw) : null;
+    }
+
+    function ensureStudentLoggedIn() {
+      const token = getStudentToken();
+      const user = getStudentUser();
+
+      if (!token || !user || (user.role || "").toLowerCase() !== "student") {
+        alert("Please login as student first.");
+        window.location.href = "index.html";
+        return false;
+      }
+      return true;
+    }
+
+    async function loadResources() {
+      if (!ensureStudentLoggedIn()) return;
+
+      const year = document.getElementById("year").value;
+      const branch = document.getElementById("branch").value;
+      const subject = document.getElementById("subject").value.trim();
+      const section = document.getElementById("section").value;
+
+      const params = new URLSearchParams();
+      if (year) params.append("year", year);
+      if (branch) params.append("branch", branch);
+      if (subject) params.append("subject", subject);
+      if (section) params.append("section", section);
+
+      const container = document.getElementById("resource-list");
+      container.innerHTML = "";
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/resources?${params.toString()}`);
+        const result = await response.json();
+
+        if (!response.ok) {
+          container.innerHTML = `<p class="empty-msg">${result.message || "Failed to load resources."}</p>`;
+          return;
+        }
+
+        const resources = result.data || [];
+
+        if (resources.length === 0) {
+          container.innerHTML = `<p class="empty-msg">No matching resources found.</p>`;
+          return;
+        }
+
+        resources.forEach(resource => {
+          const card = document.createElement("div");
+          card.className = "resource-card";
+          card.innerHTML = `
+            <h3>${resource.subject}</h3>
+            <p><strong>Year:</strong> ${resource.year}</p>
+            <p><strong>Branch:</strong> ${resource.branch}</p>
+            <p><strong>Section:</strong> ${resource.section}</p>
+            <p><strong>File:</strong> ${resource.filename}</p>
+            <p><a href="${API_BASE_URL}${resource.url}" target="_blank">Open Resource</a></p>
+          `;
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error(error);
+        container.innerHTML = `<p class="empty-msg">Error loading resources.</p>`;
+      }
+    }
+
+    window.onload = function() {
+      ensureStudentLoggedIn();
+    };
+  </script>
 
 </body>
 </html>
