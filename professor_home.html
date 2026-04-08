@@ -14,13 +14,12 @@
       margin: 0;
       font-family: Arial, sans-serif;
       color: #2c3e50;
-      background: #ededed;
+      background: linear-gradient(180deg, #f1f2f5 0%, #ececec 100%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
-    /* HERO */
     .hero-section {
       background-image: url('manipal_bg.JPG');
       background-size: cover;
@@ -29,10 +28,7 @@
     }
 
     .overlay {
-      background: linear-gradient(
-        rgba(0, 0, 0, 0.55),
-        rgba(0, 0, 0, 0.45)
-      );
+      background: rgba(0, 0, 0, 0.52);
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -40,126 +36,192 @@
       align-items: center;
       color: white;
       text-align: center;
+      padding: 20px;
     }
 
     .overlay h1 {
       font-size: 3rem;
       margin: 0;
+      font-weight: 700;
+      letter-spacing: 0.3px;
     }
 
     .overlay p {
-      margin-top: 12px;
       font-size: 1.1rem;
+      margin-top: 14px;
+      max-width: 760px;
+      line-height: 1.5;
     }
 
-    /* NAVBAR */
     nav {
-      background: #f39c12;
+      background: #d88910;
       display: flex;
       justify-content: center;
-      gap: 36px;
-      padding: 14px 20px;
+      align-items: center;
+      gap: 34px;
+      padding: 10px 20px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.10);
+      flex-wrap: wrap;
     }
 
-    nav a, nav button {
+    nav a,
+    nav button {
       color: white;
       text-decoration: none;
       font-weight: bold;
-      background: none;
+      font-size: 14px;
+      background: transparent;
       border: none;
       cursor: pointer;
+      padding: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    nav a {
       position: relative;
     }
 
     nav a::after {
       content: "";
-      display: block;
+      position: absolute;
+      left: 0;
+      bottom: -4px;
       width: 0%;
       height: 2px;
       background: white;
-      transition: 0.3s;
-      margin: auto;
+      transition: width 0.25s ease;
     }
 
     nav a:hover::after {
       width: 100%;
     }
 
-    /* MAIN SECTION */
+    nav a.active::after {
+      width: 100%;
+    }
+
+    nav a:hover,
+    nav button:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
     .dashboard-section {
+      background:
+        radial-gradient(circle at top left, rgba(255, 215, 120, 0.12), transparent 25%),
+        radial-gradient(circle at top right, rgba(216, 137, 16, 0.08), transparent 22%),
+        linear-gradient(180deg, #f1f2f5 0%, #ececec 100%);
       flex: 1;
-      padding: 60px 20px;
+      padding: 58px 20px 72px;
     }
 
     .container {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 24px;
+      gap: 28px;
+      max-width: 1120px;
+      margin: 0 auto;
     }
 
-    /* CARDS */
     .card {
-      background: #f7f0da;
-      width: 290px;
-      padding: 24px;
+      background: linear-gradient(180deg, #f9f3df 0%, #f5ecd4 100%);
+      width: 305px;
+      min-height: 225px;
+      padding: 26px 24px;
       border-radius: 18px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: 0.25s;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      border: 1px solid #ecd7a3;
     }
 
     .card:hover {
-      transform: translateY(-8px);
+      transform: translateY(-6px);
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.12);
     }
 
     .card h2 {
-      color: #e67e22;
-      margin: 0;
+      color: #df7f1d;
+      margin: 0 0 12px 0;
+      font-size: 1.8rem;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: 0.2px;
     }
 
     .card p {
-      margin: 10px 0 16px;
-      font-size: 0.95rem;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin: 0 0 18px 0;
+      color: #46566f;
+      font-weight: 500;
     }
 
-    /* BUTTON */
     .btn {
-      background: #f1c40f;
+      background: #e5b300;
       border: none;
-      padding: 10px;
+      padding: 10px 16px;
       border-radius: 10px;
       color: white;
       font-weight: bold;
+      font-size: 14px;
       cursor: pointer;
+      transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .btn:hover {
-      background: #e67e22;
+      background: #d07d12;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(208, 125, 18, 0.22);
+    }
+
+    .card a {
+      text-decoration: none;
     }
 
     footer {
-      background: #f39c12;
+      background: #d88910;
       color: white;
       text-align: center;
-      padding: 12px;
+      padding: 7px 10px;
+      font-size: 0.88rem;
+      margin-top: auto;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    @media (max-width: 768px) {
+      .overlay h1 {
+        font-size: 2.2rem;
+      }
+
+      .overlay p {
+        font-size: 1rem;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 340px;
+      }
+
+      nav {
+        gap: 20px;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <!-- HERO -->
   <div class="hero-section">
     <div class="overlay">
       <h1>Professor Dashboard</h1>
-      <p>Manage availability, meetings, and student interaction efficiently</p>
+      <p>Manage meetings, resources, and student interaction efficiently</p>
     </div>
   </div>
 
-  <!-- NAV -->
   <nav>
     <a href="meeting_requests.html">Meetings</a>
     <a href="upload_resources.html">Resources</a>
@@ -167,31 +229,34 @@
     <button onclick="logoutUser()">Logout</button>
   </nav>
 
-  <!-- DASHBOARD -->
   <section class="dashboard-section">
     <div class="container">
 
-      
-
       <div class="card">
-        <h2>Meetings</h2>
-        <p>Accept, reject, or reschedule meeting requests.</p>
+        <div>
+          <h2>Meetings</h2>
+          <p>Accept, reject, or reschedule meeting requests.</p>
+        </div>
         <a href="meeting_requests.html">
           <button class="btn">Open</button>
         </a>
       </div>
 
       <div class="card">
-        <h2>Resources</h2>
-        <p>Upload and manage study materials for students.</p>
+        <div>
+          <h2>Resources</h2>
+          <p>Upload and manage study materials for students.</p>
+        </div>
         <a href="upload_resources.html">
           <button class="btn">Upload</button>
         </a>
       </div>
 
       <div class="card">
-        <h2>Messages</h2>
-        <p>Communicate with students and resolve queries.</p>
+        <div>
+          <h2>Messages</h2>
+          <p>Communicate with students and resolve queries.</p>
+        </div>
         <a href="professor_messages.html">
           <button class="btn">View</button>
         </a>
@@ -209,6 +274,14 @@
       localStorage.clear();
       window.location.href = "index.html";
     }
+
+    // underline active navbar link
+    const links = document.querySelectorAll("nav a");
+    links.forEach(link => {
+      if (link.href === window.location.href) {
+        link.classList.add("active");
+      }
+    });
   </script>
 
 </body>
