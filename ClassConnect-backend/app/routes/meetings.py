@@ -70,6 +70,21 @@ def incoming_for_prof():
     )
     return api_response(meetings_schema.dump(ms))
 
+@meetings_bp.get("")
+@jwt_required()
+def list_meetings():
+    role = current_user_role()
+    uid = current_user_id()
+
+    qs = Meeting.query
+
+    if role == "professor":
+        qs = qs.filter(Meeting.professor_id == uid)
+
+    if role == "student":
+        qs = qs.filter(Meeting.student_id == uid)
+
+    return api_response(meetings_schema.dump(qs.all()))
 
 @meetings_bp.get("/mine")
 @jwt_required()
